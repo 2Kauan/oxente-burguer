@@ -1,0 +1,746 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+    <title>🍔 BurgerHouse</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      /* ═══════════════════════════════════════════════
+       DESIGN — Cliente Mobile
+    ═══════════════════════════════════════════════ */
+      :root {
+        --bg: #1c1a17;
+        --surface: #252320;
+        --surface2: #2e2b27;
+        --border: #3a3632;
+        --accent: #e8521a;
+        --accent2: #f2a134;
+        --cream: #f5ede0;
+        --text: #f0e8db;
+        --muted: #80756c;
+        --dim: #403c38;
+        --green: #5aaa72;
+        --red: #e05252;
+        --r: 12px;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+      body { font-family: "DM Sans", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; transition: all 0.3s ease; }
+
+      /* ── ESTADO: LOJA FECHADA GLOBAL (KILL SWITCH) ── */
+      body.is-closed .products-list,
+      body.is-closed .cat-scroll,
+      body.is-closed .search-wrap {
+        opacity: 0.45;
+        pointer-events: none;
+        filter: grayscale(80%);
+      }
+      body.is-closed .cart-sticky-footer {
+        display: none !important;
+      }
+      .global-closed-banner {
+        display: none;
+        background: rgba(224, 82, 82, 0.1);
+        border: 1px solid rgba(224, 82, 82, 0.25);
+        margin: 14px 16px 0;
+        padding: 16px;
+        border-radius: var(--r);
+        text-align: center;
+        color: var(--red);
+      }
+      .global-closed-banner.show {
+        display: block;
+        animation: slideDown 0.3s ease;
+      }
+      @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .global-closed-title {
+        font-family: "Fraunces", serif;
+        font-size: 18px;
+        font-weight: 900;
+        margin-bottom: 4px;
+      }
+      .global-closed-sub {
+        font-size: 13px;
+        font-weight: 500;
+        opacity: 0.9;
+        color: var(--muted);
+      }
+
+      .header { position: sticky; top: 0; z-index: 100; background: var(--bg); border-bottom: 1px solid var(--border); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+      .brand { font-family: "Fraunces", serif; font-size: 22px; font-weight: 900; color: var(--accent); }
+      .mesa-tag { background: var(--surface2); border: 1px solid var(--border); border-radius: 99px; padding: 5px 13px; font-size: 12px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+      .mesa-tag b { color: var(--accent2); }
+      .waiter-btn { flex-shrink: 0; background: transparent; border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; color: var(--muted); font-size: 18px; cursor: pointer; transition: all 0.2s; }
+      .waiter-btn.calling { border-color: var(--accent2); color: var(--accent2); animation: ringPulse 1s infinite; }
+      @keyframes ringPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+
+      .error-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 90vh; padding: 40px 24px; text-align: center; gap: 14px; }
+      .error-icon { font-size: 60px; }
+      .error-title { font-family: "Fraunces", serif; font-size: 28px; color: var(--red); }
+      .error-desc { color: var(--muted); font-size: 14px; line-height: 1.6; }
+
+      .closed-banner { background: var(--dim); border: 1px solid var(--border); border-radius: var(--r); margin: 14px 16px; padding: 14px 16px; display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); }
+      .closed-banner span:first-child { font-size: 20px; }
+
+      .tabs { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 57px; z-index: 90; }
+      .tab { flex: 1; padding: 13px 0; text-align: center; font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; border: none; background: none; position: relative; transition: color 0.2s; letter-spacing: 0.3px; }
+      .tab.active { color: var(--accent); }
+      .tab.active::after { content: ""; position: absolute; bottom: 0; left: 20%; right: 20%; height: 2px; background: var(--accent); border-radius: 2px; }
+      .badge { display: inline-flex; align-items: center; justify-content: center; width: 17px; height: 17px; background: var(--accent); color: white; border-radius: 50%; font-size: 10px; font-weight: 700; margin-left: 4px; vertical-align: middle; }
+
+      .panel { display: none; padding-bottom: 120px; }
+      .panel.active { display: block; }
+
+      .search-wrap { padding: 12px 16px 4px; }
+      .search-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px 10px 38px; color: var(--text); font-family: "DM Sans", sans-serif; font-size: 14px; outline: none; transition: border-color 0.2s; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2380756c' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398l3.85 3.85a1 1 0 0 0 1.415-1.415l-3.868-3.833zm-5.242 1.656a5 5 0 1 1 0-10 5 5 0 0 1 0 10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: 12px 50%; }
+      .search-input::placeholder { color: var(--muted); }
+      .search-input:focus { border-color: var(--accent); }
+      .cat-scroll { display: flex; gap: 7px; padding: 10px 16px; overflow-x: auto; scrollbar-width: none; }
+      .cat-scroll::-webkit-scrollbar { display: none; }
+      .cat-btn { flex-shrink: 0; padding: 6px 14px; border-radius: 99px; border: 1px solid var(--border); background: var(--surface2); color: var(--muted); font-family: "DM Sans", sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; letter-spacing: 0.3px; }
+      .cat-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+
+      .products-list { padding: 4px 16px; display: flex; flex-direction: column; gap: 10px; }
+      .product-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; display: flex; gap: 0; transition: border-color 0.2s; }
+      .product-card.unavailable { opacity: 0.45; pointer-events: none; }
+      .product-img { width: 90px; height: 90px; object-fit: cover; flex-shrink: 0; background: var(--surface2); }
+      .product-body { flex: 1; padding: 12px 14px 12px 12px; display: flex; flex-direction: column; justify-content: space-between; min-width: 0; }
+      .product-top { margin-bottom: 4px; }
+      .product-name { font-weight: 700; font-size: 14px; margin-bottom: 2px; line-height: 1.3; }
+      .product-desc { font-size: 11px; color: var(--muted); line-height: 1.4; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+      .unavail-tag { font-size: 10px; color: var(--red); font-weight: 600; margin-top: 2px; }
+      .product-bottom { display: flex; align-items: center; justify-content: space-between; }
+      .product-price { font-family: "Fraunces", serif; font-size: 16px; font-weight: 700; color: var(--accent2); }
+      .add-btn { width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--accent); background: transparent; color: var(--accent); font-size: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; line-height: 1; }
+      .add-btn.in-cart { background: var(--accent); color: white; border-color: var(--accent); }
+      .add-btn:active { transform: scale(0.88); }
+
+      .cart-empty { display: flex; flex-direction: column; align-items: center; padding: 60px 24px; color: var(--muted); text-align: center; gap: 10px; }
+      .cart-empty-icon { font-size: 52px; }
+      .cart-empty-label { font-family: "Fraunces", serif; font-size: 22px; color: var(--dim); }
+      .cart-items { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+      .cart-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 12px 14px; display: flex; gap: 10px; align-items: flex-start; }
+      .cart-item-img { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+      .cart-item-body { flex: 1; min-width: 0; }
+      .cart-item-name { font-weight: 600; font-size: 13px; margin-bottom: 2px; }
+      .cart-item-price { font-size: 12px; color: var(--muted); }
+      .obs-input { width: 100%; margin-top: 6px; background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; padding: 7px 10px; color: var(--text); font-family: "DM Sans", sans-serif; font-size: 12px; outline: none; resize: none; transition: border-color 0.2s; }
+      .obs-input::placeholder { color: var(--muted); }
+      .obs-input:focus { border-color: var(--accent); }
+      .cart-item-controls { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+      .qty-btn { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface2); color: var(--text); font-size: 15px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; }
+      .qty-btn.del { border-color: var(--red); color: var(--red); }
+      .qty-btn:active { transform: scale(0.88); }
+      .qty-num { font-weight: 700; font-size: 15px; min-width: 22px; text-align: center; }
+      
+      /* ── RODAPÉ FIXO DO CARRINHO (GLASSMORPHISM) ── */
+      .cart-sticky-footer {
+        position: sticky;
+        bottom: 0;
+        background: rgba(28, 26, 23, 0.92);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-top: 1px solid var(--border);
+        padding: 14px 0 0;
+        z-index: 95;
+      }
+      .cart-summary { margin: 0 16px; background: transparent; padding: 0 4px 12px; }
+      .summary-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+      .summary-total { display: flex; justify-content: space-between; font-weight: 700; font-size: 18px; align-items: center; }
+      .summary-total span:last-child { font-family: "Fraunces", serif; color: var(--accent2); font-size: 22px; }
+      
+      .send-wrap { padding: 0 16px 16px; }
+      .send-btn { width: 100%; padding: 17px; background: var(--accent); color: white; border: none; border-radius: var(--r); font-family: "Fraunces", serif; font-size: 19px; font-weight: 900; cursor: pointer; transition: all 0.2s; letter-spacing: 0.5px; }
+      .send-btn:disabled { background: var(--dim); color: var(--muted); cursor: not-allowed; }
+      .send-btn:not(:disabled):active { transform: scale(0.98); background: #c4411a; }
+
+      .eta-banner { margin: 14px 16px 0; background: rgba(242, 161, 52, 0.1); border: 1px solid rgba(242, 161, 52, 0.25); border-radius: var(--r); padding: 12px 14px; display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--accent2); }
+      .eta-banner strong { font-weight: 700; }
+
+      .orders-list { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+      .order-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; animation: fadeUp 0.3s ease; }
+      @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+      .order-head { display: flex; justify-content: space-between; align-items: center; padding: 11px 14px; background: var(--surface2); border-bottom: 1px solid var(--border); }
+      .order-id-txt { font-size: 11px; color: var(--muted); }
+      .status-pill { padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+      .sp-pending { background: rgba(240, 180, 41, 0.12); color: #f0b429; border: 1px solid rgba(240, 180, 41, 0.3); }
+      .sp-preparing { background: rgba(232, 82, 26, 0.12); color: var(--accent); border: 1px solid rgba(232, 82, 26, 0.3); }
+      .sp-done { background: rgba(90, 170, 114, 0.15); color: var(--green); border: 1px solid rgba(90, 170, 114, 0.3); }
+      .order-body { padding: 11px 14px; }
+      .order-item-row { display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; border-bottom: 1px solid var(--border); }
+      .order-item-row:last-child { border-bottom: none; }
+      .order-item-obs { font-size: 10px; color: var(--muted); font-style: italic; margin-top: 1px; }
+      .order-foot { display: flex; justify-content: space-between; font-weight: 700; font-size: 14px; padding: 10px 14px; border-top: 1px solid var(--border); }
+      .order-foot span:last-child { font-family: "Fraunces", serif; color: var(--accent2); }
+
+      .poll-bar { padding: 8px 16px; display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+      .poll-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); animation: blink 2s infinite; }
+      @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+
+      .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(12px); background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r); padding: 11px 18px; font-size: 13px; font-weight: 600; opacity: 0; transition: all 0.3s; z-index: 999; white-space: nowrap; pointer-events: none; }
+      .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+      .toast.ok { border-color: var(--green); color: var(--green); }
+      .toast.err { border-color: var(--red); color: var(--red); }
+
+      .skel { background: linear-gradient( 90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75% ); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: var(--r); }
+      @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+      .skel-card { height: 90px; margin: 0 16px 10px; }
+    </style>
+  </head>
+  <body>
+    <div id="err" style="display: none" class="error-screen">
+      <div class="error-icon">🚫</div>
+      <div class="error-title">Acesso Negado</div>
+      <p class="error-desc" id="err-msg">
+        Link de mesa inválido.<br />Use o cartão NFC da sua mesa.
+      </p>
+    </div>
+
+    <div id="app" style="display: none">
+      <header class="header">
+        <div class="brand">🍔 BurgerHouse</div>
+        <div class="mesa-tag">Mesa <b id="h-mesa">–</b></div>
+        <button class="waiter-btn" id="waiter-btn" onclick="callWaiter()" title="Chamar garçom">
+          🔔
+        </button>
+      </header>
+
+      <div id="closed-banner" class="closed-banner" style="display: none">
+        <span>🔒</span>
+        <span>Mesa encerrada. Obrigado pela visita! Fale com o garçom para nova sessão.</span>
+      </div>
+
+      <div class="global-closed-banner" id="global-closed-banner">
+        <div class="global-closed-title">🌙 Estamos Fechados</div>
+        <div class="global-closed-sub">O salão não está aceitando novos pedidos no momento.</div>
+      </div>
+
+      <nav class="tabs">
+        <button class="tab active" onclick="goTab('menu')">🍽 Cardápio</button>
+        <button class="tab" onclick="goTab('cart')" id="tab-cart">
+          🛒 Carrinho
+          <span class="badge" id="cart-badge" style="display: none">0</span>
+        </button>
+        <button class="tab" onclick="goTab('orders')">📦 Pedidos</button>
+      </nav>
+
+      <div class="panel active" id="panel-menu">
+        <div class="search-wrap">
+          <input class="search-input" id="search" placeholder="Buscar no cardápio…" oninput="renderMenu()" type="search" autocomplete="off" />
+        </div>
+        <div class="cat-scroll">
+          <button class="cat-btn active" onclick="setCat(this, 'all')">Todos</button>
+          <button class="cat-btn" onclick="setCat(this, 'burger')">🍔 Burgers</button>
+          <button class="cat-btn" onclick="setCat(this, 'acomp')">🍟 Acompanhamentos</button>
+          <button class="cat-btn" onclick="setCat(this, 'bebida')">🥤 Bebidas</button>
+          <button class="cat-btn" onclick="setCat(this, 'sobremesa')">🍫 Sobremesas</button>
+        </div>
+        <div class="products-list" id="products-list">
+          <div class="skel skel-card"></div>
+          <div class="skel skel-card"></div>
+          <div class="skel skel-card"></div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-cart">
+        <div id="cart-body"></div>
+        
+        <div class="cart-sticky-footer" id="cart-footer" style="display: none;">
+          <div class="cart-summary">
+            <div class="summary-row"><span id="cart-count-txt">0 itens</span></div>
+            <div class="summary-total"><span>Total</span><span id="cart-total-txt">R$ 0,00</span></div>
+          </div>
+          <div class="send-wrap">
+            <button class="send-btn" id="send-btn" onclick="sendOrder()">
+              ENVIAR PEDIDO
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-orders">
+        <div class="poll-bar">
+          <div class="poll-dot"></div>
+          Atualizando automaticamente
+        </div>
+        <div id="orders-body"></div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+      /* ═══════════════════════════════════════════════════════════════
+       CLIENT APP v2 - SALÃO COM SINCRONIZAÇÃO E KILL SWITCH (LOJA FECHADA)
+      ═══════════════════════════════════════════════════════════════ */
+
+      const DB_KEY = "burgerhouse_db_v2";
+      const DB_VER = 2;
+
+      function readDb() {
+        try {
+          const r = localStorage.getItem(DB_KEY);
+          if (r) {
+            const d = JSON.parse(r);
+            if (d.version === DB_VER) return d;
+          }
+          const f = { version: DB_VER, sessions: [], notifications: [], products: [], deliveries: [], lojaAberta: true, updatedAt: Date.now() };
+          localStorage.setItem(DB_KEY, JSON.stringify(f));
+          return f;
+        } catch (e) {
+          return { version: DB_VER, sessions: [], notifications: [], products: [], deliveries: [], lojaAberta: true, updatedAt: Date.now() };
+        }
+      }
+      function writeDb(db) {
+        db.updatedAt = Date.now();
+        try { localStorage.setItem(DB_KEY, JSON.stringify(db)); } catch (e) { console.error(e); }
+      }
+
+      const TABLE_TOKENS = { 1: "tok_mesa1_abc123", 2: "tok_mesa2_def456", 3: "tok_mesa3_ghi789", 4: "tok_mesa4_jkl012" };
+      const VALID_TABLES = [1, 2, 3, 4];
+
+      const PRODUCTS = [
+        { id: 1, nome: "Smash Clássico", preco: 28.9, categoria: "burger", descricao: "Blend 180g, queijo cheddar, alface, tomate", img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80", disponivel: true },
+        { id: 2, nome: "Double Smash", preco: 38.9, categoria: "burger", descricao: "Dois blends 180g, duplo cheddar, bacon crocante", img: "https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=400&q=80", disponivel: true },
+        { id: 3, nome: "Crispy Chicken", preco: 32.9, categoria: "burger", descricao: "Frango empanado crocante, maionese de mel, picles", img: "https://images.unsplash.com/photo-1606755962773-d324e0a13086?w=400&q=80", disponivel: true },
+        { id: 4, nome: "Veggie Smash", preco: 29.9, categoria: "burger", descricao: "Blend de grão-de-bico, queijo vegano, rúcula", img: "https://images.unsplash.com/photo-1520072959219-c595dc870360?w=400&q=80", disponivel: true },
+        { id: 5, nome: "BBQ Bacon", preco: 36.9, categoria: "burger", descricao: "Blend 200g, cheddar defumado, onion rings, BBQ", img: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=400&q=80", disponivel: false },
+        { id: 6, nome: "Batata Frita P", preco: 12.9, categoria: "acomp", descricao: "Batata crocante com sal e ervas", img: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&q=80", disponivel: true },
+        { id: 7, nome: "Batata Frita G", preco: 18.9, categoria: "acomp", descricao: "Porção grande para compartilhar", img: "https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?w=400&q=80", disponivel: true },
+        { id: 8, nome: "Onion Rings", preco: 16.9, categoria: "acomp", descricao: "Anéis de cebola empanados crocantes", img: "https://images.unsplash.com/photo-1639024471283-03518883512d?w=400&q=80", disponivel: true },
+        { id: 9, nome: "Refrigerante", preco: 7.9, categoria: "bebida", descricao: "Coca-Cola, Guaraná ou Sprite — lata 350ml", img: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&q=80", disponivel: true },
+        { id: 10, nome: "Milk Shake", preco: 19.9, categoria: "bebida", descricao: "Chocolate, Baunilha ou Morango — 400ml", img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=400&q=80", disponivel: true },
+        { id: 11, nome: "Água Mineral", preco: 5.9, categoria: "bebida", descricao: "500ml com ou sem gás", img: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400&q=80", disponivel: true },
+        { id: 12, nome: "Brownie", preco: 11.9, categoria: "sobremesa", descricao: "Brownie quente com sorvete de creme", img: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=400&q=80", disponivel: true },
+      ];
+
+      function getProducts() {
+        const db = readDb();
+        const dbProds = db.products || [];
+        return PRODUCTS.map((p) => {
+          const dbP = dbProds.find((d) => d.id === p.id);
+          return dbP ? { ...p, disponivel: dbP.disponivel } : p;
+        });
+      }
+
+      let S = { mesa: null, token: null, sessionId: null, sessionStatus: "open", cart: [], currentCat: "all", currentTab: "menu" };
+
+      function fmt(v) { return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v); }
+      function fmtTime(ts) { return new Date(ts).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }); }
+
+      const CART_KEY = () => `cart_${S.token}`;
+      function saveCart() { try { localStorage.setItem(CART_KEY(), JSON.stringify(S.cart)); } catch (e) {} }
+      function loadCart() { try { const r = localStorage.getItem(CART_KEY()); return r ? JSON.parse(r) : []; } catch (e) { return []; } }
+
+      function getSession() {
+        const db = readDb();
+        return db.sessions.filter((s) => s.token === S.token).sort((a, b) => b.createdAt - a.createdAt)[0] || null;
+      }
+
+      function getOrCreateSession() {
+        let sess = getSession();
+        // Só cria nova se não existir NENHUMA sessão (aberta ou fechada)
+        if (!sess) {
+          const db = readDb();
+          sess = { sessionId: `sess_${S.mesa}_${Date.now()}`, mesa: S.mesa, token: S.token, status: "open", orders: [], garcomChamado: false, createdAt: Date.now(), updatedAt: Date.now() };
+          db.sessions.push(sess); writeDb(db);
+        }
+        S.sessionId = sess.sessionId;
+        S.sessionStatus = sess.status;
+        return sess;
+      }
+
+      function broadcast(payload) {
+        const db = readDb();
+        db.notifications = db.notifications || [];
+        db.notifications.unshift({ ...payload, id: Date.now(), read: false, ts: Date.now() });
+        if (db.notifications.length > 100) db.notifications = db.notifications.slice(0, 100);
+        writeDb(db);
+      }
+
+      function init() {
+        const p = new URLSearchParams(location.search);
+        const mesa = parseInt(p.get("mesa"), 10);
+        const token = p.get("token");
+        if (!VALID_TABLES.includes(mesa)) return showErr("Mesa inválida. Use o cartão NFC da sua mesa.");
+        if (!token || TABLE_TOKENS[mesa] !== token) return showErr(`Token inválido para Mesa ${mesa}.`);
+        
+        S.mesa = mesa; S.token = token;
+        document.getElementById("h-mesa").textContent = mesa;
+        document.getElementById("err").style.display = "none";
+        document.getElementById("app").style.display = "block";
+        
+        S.cart = loadCart();
+        const sess = getOrCreateSession();
+        if (sess.status === "closed") {
+          S.sessionStatus = "closed";
+          document.getElementById("closed-banner").style.display = "flex";
+        }
+        
+        // Verifica loja fechada global no boot
+        const initialDb = readDb();
+        _wasOpen = initialDb.lojaAberta !== false;
+        renderLojaFechadaState(_wasOpen);
+
+        renderMenu(); renderCart(); renderOrders(); updateBadge();
+        iniciarRadarSalao();
+      }
+
+      function showErr(msg) {
+        document.getElementById("err-msg").innerHTML = msg;
+        document.getElementById("err").style.display = "flex";
+        document.getElementById("app").style.display = "none";
+      }
+
+      function setCat(btn, cat) {
+        document.querySelectorAll(".cat-btn").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        S.currentCat = cat;
+        renderMenu();
+      }
+
+      function renderMenu() {
+        try {
+          const searchEl = document.getElementById("search");
+          const q = (searchEl ? searchEl.value : "").toLowerCase();
+          const list = document.getElementById("products-list");
+
+          const prods = getProducts();
+
+          let items = prods.filter((p) => {
+            const catOk = S.currentCat === "all" || p.categoria === S.currentCat;
+            const n = p.nome ? p.nome.toLowerCase() : "";
+            const d = p.descricao ? p.descricao.toLowerCase() : "";
+            const qOk = !q || n.includes(q) || d.includes(q);
+            return catOk && qOk;
+          });
+
+          if (items.length === 0) {
+            list.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted);font-size:14px">Nenhum item encontrado</div>`;
+            return;
+          }
+
+          // LÓGICA: BOTÕES IFOOD-STYLE
+          list.innerHTML = items.map((p) => {
+            const inCart = S.cart.find((c) => c.id === p.id);
+            
+            let btnHtml = "";
+            if (p.disponivel) {
+              if (inCart) {
+                btnHtml = `<div style="display:flex; align-items:center; gap:6px;">
+                  <button class="qty-btn del" onclick="updateQty(${p.id}, -1)">−</button>
+                  <span class="qty-num" style="font-size:14px; min-width:20px;">${inCart.quantidade}</span>
+                  <button class="qty-btn" onclick="updateQty(${p.id}, +1)" style="color: var(--accent); border-color: var(--accent);">+</button>
+                </div>`;
+              } else {
+                btnHtml = `<button class="add-btn" onclick="addCart(${p.id})">+</button>`;
+              }
+            }
+
+            return `<div class="product-card${p.disponivel ? "" : " unavailable"}">
+              <img class="product-img" src="${p.img}" alt="${p.nome}" loading="lazy" onerror="this.style.background='var(--surface2)';this.src=''"/>
+              <div class="product-body">
+                <div class="product-top">
+                  <div class="product-name">${p.nome}</div>
+                  <div class="product-desc">${p.descricao || ""}</div>
+                  ${!p.disponivel ? '<div class="unavail-tag">Indisponível no momento</div>' : ""}
+                </div>
+                <div class="product-bottom">
+                  <div class="product-price">${fmt(p.preco)}</div>
+                  ${btnHtml}
+                </div>
+              </div>
+            </div>`;
+          }).join("");
+        } catch (e) {
+          console.error("Erro ao renderizar menu:", e);
+        }
+      }
+
+      function addCart(id) {
+        if (readDb().lojaAberta === false) return showToast("Loja fechada. Pedidos suspensos.", "err");
+        if (S.sessionStatus === "closed") { showToast("Mesa encerrada", "err"); return; }
+        
+        const prods = getProducts();
+        const p = prods.find((x) => x.id === id);
+        
+        if (!p || !p.disponivel) return;
+        const ex = S.cart.find((c) => c.id === id);
+        if (ex) ex.quantidade++; else S.cart.push({ ...p, quantidade: 1, observacao: "" });
+        saveCart(); renderMenu(); renderCart(); updateBadge(); showToast(`${p.nome} adicionado`, "ok");
+      }
+
+      function updateQty(id, delta) {
+        if (readDb().lojaAberta === false && delta > 0) return showToast("Loja fechada.", "err");
+        const idx = S.cart.findIndex((c) => c.id === id);
+        if (idx === -1) return;
+        S.cart[idx].quantidade += delta;
+        if (S.cart[idx].quantidade <= 0) S.cart.splice(idx, 1);
+        saveCart(); renderMenu(); renderCart(); updateBadge();
+      }
+
+      function updateObs(id, val) {
+        const item = S.cart.find((c) => c.id === id);
+        if (item) item.observacao = val;
+        saveCart();
+      }
+
+      function renderCart() {
+        const body = document.getElementById("cart-body");
+        const footer = document.getElementById("cart-footer");
+        const btn = document.getElementById("send-btn");
+        
+        if (S.cart.length === 0) {
+          body.innerHTML = `<div class="cart-empty"><div class="cart-empty-icon">🛒</div><div class="cart-empty-label">Carrinho vazio</div><p style="color:var(--muted);font-size:13px">Adicione itens do cardápio</p></div>`;
+          footer.style.display = "none";
+          return;
+        }
+        
+        footer.style.display = "block";
+        btn.disabled = S.sessionStatus === "closed" || readDb().lojaAberta === false;
+        
+        const total = S.cart.reduce((s, i) => s + i.preco * i.quantidade, 0);
+        const count = S.cart.reduce((s, i) => s + i.quantidade, 0);
+        
+        body.innerHTML = `
+    <div class="cart-items">
+      ${S.cart.map((item) => `
+        <div class="cart-item">
+          <img class="cart-item-img" src="${item.img}" alt="${item.nome}" onerror="this.style.display='none'"/>
+          <div class="cart-item-body">
+            <div class="cart-item-name">${item.nome}</div>
+            <div class="cart-item-price">${fmt(item.preco)} cada</div>
+            <textarea class="obs-input" rows="1" placeholder="Observação (ex: sem cebola)" oninput="updateObs(${item.id},this.value)">${item.observacao || ""}</textarea>
+            <div class="cart-item-controls">
+              <button class="qty-btn del" onclick="updateQty(${item.id},-1)">−</button>
+              <span class="qty-num">${item.quantidade}</span>
+              <button class="qty-btn" onclick="updateQty(${item.id},+1)">+</button>
+              <span style="font-size:12px;color:var(--muted);margin-left:4px">${fmt(item.preco * item.quantidade)}</span>
+            </div>
+          </div>
+        </div>`).join("")}
+    </div>`;
+
+        document.getElementById("cart-count-txt").textContent = `${count} ${count === 1 ? 'item' : 'itens'}`;
+        document.getElementById("cart-total-txt").textContent = fmt(total);
+      }
+
+      async function sendOrder() {
+        if (readDb().lojaAberta === false) {
+           showToast("A loja fechou! Pedido cancelado.", "err");
+           goTab("menu");
+           return;
+        }
+        if (S.cart.length === 0) return showToast("Carrinho vazio", "err");
+        if (S.sessionStatus === "closed") return showToast("Mesa encerrada", "err");
+        
+        const btn = document.getElementById("send-btn");
+        btn.textContent = "ENVIANDO…"; btn.disabled = true;
+        await new Promise((r) => setTimeout(r, 500));
+
+        const db = readDb();
+        const sess = db.sessions.find((s) => s.sessionId === S.sessionId);
+        if (!sess) {
+          showToast("Sessão não encontrada", "err");
+          btn.textContent = "ENVIAR PEDIDO"; btn.disabled = false; return;
+        }
+
+        const hasBurger = S.cart.some((i) => { const p = PRODUCTS.find((p) => p.id === i.id); return p && p.categoria === "burger"; });
+        const eta = hasBurger ? "15–20 min" : "8–12 min";
+
+        const order = {
+          orderId: `ord_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+          itens: S.cart.map((i) => ({ id: i.id, nome: i.nome, quantidade: i.quantidade, preco: i.preco, observacao: i.observacao || "" })),
+          status: "pending", createdAt: Date.now(), updatedAt: Date.now(), tempoEstimado: eta,
+        };
+        sess.orders.push(order); sess.updatedAt = Date.now(); writeDb(db);
+        
+        broadcast({ type: "order:new", sessionId: S.sessionId, mesa: S.mesa, orderId: order.orderId });
+
+        S.cart = []; saveCart();
+        btn.textContent = "ENVIAR PEDIDO"; btn.disabled = false;
+        renderMenu(); renderCart(); updateBadge(); renderOrders(); goTab("orders");
+
+        const ob = document.getElementById("orders-body");
+        const etaBanner = document.createElement("div");
+        etaBanner.className = "eta-banner";
+        etaBanner.innerHTML = `<span>⏱</span><span>Pedido recebido! Tempo estimado: <strong>${eta}</strong></span>`;
+        ob.prepend(etaBanner); setTimeout(() => etaBanner.remove(), 8000);
+
+        showToast("✅ Pedido enviado!", "ok");
+      }
+
+      const STATUS_LABEL = { pending: "⏳ Aguardando", preparing: "🔥 Em Preparo", done: "✅ Pronto!" };
+      const STATUS_CLASS = { pending: "sp-pending", preparing: "sp-preparing", done: "sp-done" };
+
+      function refreshOrders() {
+        if (S.currentTab === "orders") renderOrders();
+      }
+
+      function renderOrders() {
+        const body = document.getElementById("orders-body");
+        const db = readDb();
+        const sess = db.sessions.find((s) => s.sessionId === S.sessionId);
+        if (!sess || sess.orders.length === 0) {
+          body.innerHTML = `<div class="cart-empty"><div class="cart-empty-icon">📦</div><div class="cart-empty-label">Sem pedidos</div><p style="color:var(--muted);font-size:13px">Seus pedidos aparecerão aqui</p></div>`;
+          return;
+        }
+        const sorted = [...sess.orders].sort((a, b) => b.createdAt - a.createdAt);
+        body.innerHTML = `<div class="orders-list">${sorted.map((o) => {
+            const total = o.itens.reduce((s, i) => s + i.preco * i.quantidade, 0);
+            return `<div class="order-card">
+      <div class="order-head">
+        <span class="order-id-txt">#${o.orderId.slice(-6).toUpperCase()} · ${fmtTime(o.createdAt)}</span>
+        <span class="status-pill ${STATUS_CLASS[o.status] || ""}">${STATUS_LABEL[o.status] || o.status}</span>
+      </div>
+      <div class="order-body">
+        ${o.itens.map((i) => `<div class="order-item-row">
+          <div><span style="font-weight:600">${i.quantidade}× ${i.nome}</span>${i.observacao ? `<div class="order-item-obs">📝 ${i.observacao}</div>` : ""}</div>
+          <span>${fmt(i.preco * i.quantidade)}</span>
+        </div>`).join("")}
+      </div>
+      <div class="order-foot"><span>Total</span><span>${fmt(total)}</span></div>
+    </div>`;
+          }).join("")}</div>`;
+      }
+
+      let waiterCalling = false;
+      function callWaiter() {
+        const btn = document.getElementById("waiter-btn");
+        const db = readDb();
+        const sess = db.sessions.find((s) => s.sessionId === S.sessionId);
+        
+        if (waiterCalling) {
+          waiterCalling = false; btn.classList.remove("calling");
+          if (sess) { sess.garcomChamado = false; sess.updatedAt = Date.now(); writeDb(db); }
+          showToast("Chamado cancelado", "ok");
+        } else {
+          waiterCalling = true; btn.classList.add("calling");
+          if (sess) { sess.garcomChamado = true; sess.garcomTimestamp = Date.now(); sess.updatedAt = Date.now(); writeDb(db); }
+          broadcast({ type: "waiter:call", sessionId: S.sessionId, mesa: S.mesa });
+          showToast("🔔 Garçom chamado!", "ok");
+        }
+      }
+
+      function refreshWaiterState() {
+        const db = readDb();
+        const sess = db.sessions.find((s) => s.sessionId === S.sessionId);
+        if (!sess) return;
+        const btn = document.getElementById("waiter-btn");
+        if (sess.garcomChamado) { waiterCalling = true; btn.classList.add("calling"); } 
+        else { waiterCalling = false; btn.classList.remove("calling"); }
+      }
+
+      function goTab(t) {
+        if (t === "cart" && readDb().lojaAberta === false) {
+           showToast("A loja está fechada no momento.", "err");
+           return;
+        }
+
+        S.currentTab = t;
+        document.querySelectorAll(".tab").forEach((b) => b.classList.remove("active"));
+        document.querySelectorAll(".panel").forEach((p) => p.classList.remove("active"));
+        const map = { menu: 0, cart: 1, orders: 2 };
+        document.querySelectorAll(".tab")[map[t]].classList.add("active");
+        document.getElementById(`panel-${t}`).classList.add("active");
+        if (t === "orders") refreshOrders();
+      }
+
+      function updateBadge() {
+        const n = S.cart.reduce((s, i) => s + i.quantidade, 0);
+        const b = document.getElementById("cart-badge");
+        b.textContent = n; b.style.display = n > 0 ? "inline-flex" : "none";
+      }
+
+      function showToast(msg, type = "") {
+        const t = document.getElementById("toast");
+        t.textContent = msg; t.className = `toast ${type} show`;
+        clearTimeout(window._tt); window._tt = setTimeout(() => t.classList.remove("show"), 2800);
+      }
+
+      // ── RADAR E ESTADO GLOBAL ──────────────────────
+      const POLL_MS = 2000;
+      let _salaoMenuHash = "";
+      let _wasOpen = true;
+
+      function renderLojaFechadaState(isAberto) {
+        const banner = document.getElementById("global-closed-banner");
+        if (!isAberto) {
+          document.body.classList.add("is-closed");
+          if(banner) banner.classList.add("show");
+          if (S.currentTab === "cart") {
+            showToast("A loja acabou de fechar!", "err");
+            goTab("menu");
+          }
+        } else {
+          document.body.classList.remove("is-closed");
+          if(banner) banner.classList.remove("show");
+        }
+      }
+
+      function checkSessionStatus() {
+        const db = readDb();
+        const latestSess = db.sessions
+          .filter((s) => s.token === S.token)
+          .sort((a, b) => b.createdAt - a.createdAt)[0];
+
+        if (latestSess) {
+          S.sessionId = latestSess.sessionId;
+          
+          if (S.sessionStatus !== latestSess.status) {
+            S.sessionStatus = latestSess.status;
+            const banner = document.getElementById("closed-banner");
+            
+            if (S.sessionStatus === "closed") {
+              if (banner) banner.style.display = "flex";
+            } else {
+              if (banner) banner.style.display = "none";
+            }
+            if (S.currentTab === "cart") renderCart();
+          }
+        }
+      }
+
+      function iniciarRadarSalao() {
+        _salaoMenuHash = JSON.stringify(getProducts());
+
+        setInterval(() => {
+          const db = readDb();
+
+          // 1. Radar do Status Global da Loja (Kill Switch)
+          const isNowOpen = db.lojaAberta !== false;
+          if (isNowOpen !== _wasOpen) {
+            _wasOpen = isNowOpen;
+            renderLojaFechadaState(isNowOpen);
+          }
+
+          // 2. Checa se o Admin bloqueou ou liberou a MESA
+          checkSessionStatus();
+
+          // 3. Radar do Cardápio Inteligente
+          if (S.currentTab === "menu") {
+            const menuAtual = JSON.stringify(getProducts());
+            if (menuAtual !== _salaoMenuHash) {
+              _salaoMenuHash = menuAtual;
+              renderMenu();
+            }
+          }
+
+          // 4. Atualiza Status dos Pedidos e Mesa
+          if (S.currentTab === "orders") refreshOrders();
+
+          // 5. Atualiza Garçom
+          refreshWaiterState();
+
+        }, POLL_MS);
+      }
+
+      // Inicia a aplicação!
+      init();
+    </script>
+  </body>
+</html>
