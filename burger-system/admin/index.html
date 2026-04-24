@@ -93,7 +93,7 @@
         cursor: pointer;
         padding: 4px 6px;
       }
-      
+
       /* ── Loja Status Toggle ── */
       button.live-pill {
         display: flex;
@@ -496,21 +496,12 @@
         border: 1px solid var(--b);
         border-radius: var(--r);
         overflow: hidden;
-        transition:
-          border-color 0.2s,
-          opacity 0.3s,
-          filter 0.3s;
+        transition: border-color 0.2s, opacity 0.3s, filter 0.3s;
         animation: slideUp 0.3s ease;
       }
       @keyframes slideUp {
-        from {
-          opacity: 0;
-          transform: translateY(8px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
       }
       .order-card:hover {
         border-color: var(--b2);
@@ -1035,7 +1026,11 @@
         <div class="tb-left">
           <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
           <div class="tb-brand">🍔 Burger<span>House</span></div>
-          <button class="live-pill" id="btn-loja-status" onclick="toggleLojaStatus()">
+          <button
+            class="live-pill"
+            id="btn-loja-status"
+            onclick="toggleLojaStatus()"
+          >
             <div class="live-dot"></div>
             LOJA ABERTA
           </button>
@@ -1479,25 +1474,20 @@
 
       function getAllActiveOrders() {
         const db = readDb();
-        return (db.sessions || [])
-          .filter((s) => !s.archived)
-          .flatMap((sess) =>
-            (sess.orders || [])
-              .filter((o) => o.status !== "delivered")
-              .map((o) => ({
-                ...o,
-                mesa: sess.mesa,
-                sessionId: sess.sessionId,
-                sessionStatus: sess.status,
-              })),
-          )
-          .sort((a, b) => {
-            const p = { done: 0, preparing: 1, pending: 2 };
-            return (
-              (p[a.status] || 3) - (p[b.status] || 3) ||
-              b.createdAt - a.createdAt
-            );
-          });
+        return (
+          (db.sessions || [])
+            .filter((s) => !s.archived)
+            .flatMap((sess) =>
+              (sess.orders || [])
+                .map((o) => ({
+                  ...o,
+                  mesa: sess.mesa,
+                  sessionId: sess.sessionId,
+                  sessionStatus: sess.status,
+                })),
+            )
+            .sort((a, b) => a.createdAt - b.createdAt)
+        );
       }
 
       const STATUS_LABEL = {
@@ -1597,41 +1587,23 @@
       }
 
       function zerarCaixa() {
-        const db = readDb();
-
-        // Verifica se há alguma mesa que ainda está aberta
-        const mesasAbertas = (db.sessions || []).some(
-          (sess) => sess.status === "open" && !sess.archived,
-        );
-
-        // Verifica se há algum delivery em andamento
-        const deliveryPendente = (db.deliveries || []).some(
-          (del) => del.status !== "delivered" && !del.archived,
-        );
-
-        // Se tiver mesa aberta ou delivery rodando, bloqueia e avisa!
-        if (mesasAbertas || deliveryPendente) {
-          showToast(
-            "⚠️ Feche as mesas e conclua deliveries para zerar o caixa.",
-            "err",
-          );
-          return;
-        }
-
         openModal(
           "Zerar Caixa do Dia",
-          "Mesas encerradas e deliveries entregues sumirão da tela inicial, mas o faturamento continuará <b>salvo no Relatório</b>.",
+          "Esta ação vai limpar o painel. Mesas e deliveries sumirão da tela inicial, mas o faturamento continuará <b>salvo no Relatório</b>.",
           "🧹 Zerar Painel",
           "red",
           () => {
             const dbAtualizado = readDb();
-            // Arquiva mesas encerradas
+            // Força o encerramento e arquiva tudo que estiver no painel
             (dbAtualizado.sessions || []).forEach((sess) => {
-              if (sess.status === "closed") sess.archived = true;
+              if (sess.status === "open") {
+                  sess.status = "closed";
+                  sess.closedAt = Date.now();
+              }
+              sess.archived = true;
             });
-            // Arquiva deliveries entregues
             (dbAtualizado.deliveries || []).forEach((del) => {
-              if (del.status === "delivered") del.archived = true;
+              del.archived = true;
             });
             writeDb(dbAtualizado);
             refresh();
@@ -1721,7 +1693,7 @@
       // ── Gestão de Status da Loja ────────────────────────────────────
       function getLojaState() {
         const db = readDb();
-        return db.lojaAberta !== false; 
+        return db.lojaAberta !== false;
       }
 
       function renderLojaStatus() {
@@ -1739,44 +1711,58 @@
       function toggleLojaStatus() {
         const db = readDb();
         const isAberto = db.lojaAberta !== false;
-        
-        const mesasAbertas = (db.sessions || []).filter((s) => s.status === "open" && !s.archived);
-        const deliveryPendente = (db.deliveries || []).some((d) => d.status !== "delivered" && !d.archived);
-        
+
+        const mesasAbertas = (db.sessions || []).filter(
+          (s) => s.status === "open" && !s.archived,
+        );
+        const deliveryPendente = (db.deliveries || []).some(
+          (d) => d.status !== "delivered" && !d.archived,
+        );
+
         let warningText = "";
         if (isAberto) {
           if (mesasAbertas.length > 0 || deliveryPendente) {
-            warningText = `<br><br><span style='color: var(--acc2); font-size: 11px;'>⚠️ <b>Atenção:</b> Você tem ${mesasAbertas.length} mesa(s) aberta(s). Fechar a loja irá <b>encerrar todas as mesas automaticamente</b> e bloquear novos pedidos de delivery.</span>`;
+            warningText = `<br><br><span style='color: var(--acc2); font-size: 11px;'>⚠️ <b>Atenção:</b> Fechar a loja agora irá <b>encerrar e limpar</b> automaticamente todas as mesas abertas e arquivar todos os deliveries. Os dados irão para o Relatório.</span>`;
           } else {
-            warningText = "<br><br><span style='color: var(--muted); font-size: 11px;'>Nenhuma mesa aberta no momento. O cardápio será bloqueado para novos pedidos.</span>";
+            warningText =
+              "<br><br><span style='color: var(--muted); font-size: 11px;'>Nenhuma mesa aberta no momento. O cardápio será bloqueado para novos pedidos.</span>";
           }
         }
 
         const title = isAberto ? "Fechar Hamburgueria" : "Abrir Hamburgueria";
-        const msg = isAberto 
+        const msg = isAberto
           ? `Tem certeza que deseja <b>fechar</b> a loja?${warningText}`
           : "Tem certeza que deseja <b>abrir</b> a loja?<br>Isso irá <b>reativar todas as mesas (1 a 4)</b> automaticamente para novos clientes.";
-        
+
         const confirmBtn = isAberto ? "🔒 Fechar Loja" : "🟢 Abrir Loja";
         const colorType = isAberto ? "red" : "green";
 
         openModal(title, msg, confirmBtn, colorType, () => {
           const dbAtualizado = readDb();
-          
+
           if (isAberto) {
-            // FECHAR: Encerra todas as mesas ativas
-            (dbAtualizado.sessions || []).forEach(sess => {
-              if (sess.status === "open" && !sess.archived) {
-                sess.status = "closed";
-                sess.closedAt = Date.now();
-                sess.updatedAt = Date.now();
-              }
+            // FECHAR: Zera o caixa automaticamente (arquiva e encerra tudo)
+            (dbAtualizado.sessions || []).forEach((sess) => {
+              sess.status = "closed";
+              sess.closedAt = Date.now();
+              sess.updatedAt = Date.now();
+              sess.archived = true; 
+            });
+            (dbAtualizado.deliveries || []).forEach((del) => {
+              del.archived = true;
             });
           } else {
             // ABRIR: Reativa automaticamente as mesas de 1 a 4 se estiverem fechadas
-            const tokenMap = { 1: "tok_mesa1_abc123", 2: "tok_mesa2_def456", 3: "tok_mesa3_ghi789", 4: "tok_mesa4_jkl012" };
-            [1, 2, 3, 4].forEach(m => {
-              const jaAberta = (dbAtualizado.sessions || []).some(s => s.mesa === m && s.status === "open" && !s.archived);
+            const tokenMap = {
+              1: "tok_mesa1_abc123",
+              2: "tok_mesa2_def456",
+              3: "tok_mesa3_ghi789",
+              4: "tok_mesa4_jkl012",
+            };
+            [1, 2, 3, 4].forEach((m) => {
+              const jaAberta = (dbAtualizado.sessions || []).some(
+                (s) => s.mesa === m && s.status === "open" && !s.archived,
+              );
               if (!jaAberta) {
                 dbAtualizado.sessions.push({
                   sessionId: `sess_${m}_${Date.now()}`,
@@ -1797,8 +1783,11 @@
           writeDb(dbAtualizado);
           renderLojaStatus();
           refresh(); // Atualiza a interface
-          
-          showToast(`Hamburgueria ${!isAberto ? 'ABERTA' : 'FECHADA'} com sucesso!`, !isAberto ? 'ok' : 'err');
+
+          showToast(
+            `Hamburgueria ${!isAberto ? "ABERTA" : "FECHADA e Caixa Zerado"} com sucesso!`,
+            !isAberto ? "ok" : "err",
+          );
         });
       }
 
@@ -1896,10 +1885,11 @@
       // ── Render: Mesa cards ────────────────────────────────────────
       function renderMesaCards() {
         const grid = document.getElementById("mesa-grid");
-        const orders = getAllActiveOrders();
+        const allOrders = getAllActiveOrders();
+        
         grid.innerHTML = [1, 2, 3, 4]
           .map((m) => {
-            const mesaOrders = orders.filter(
+            const mesaOrders = allOrders.filter(
               (o) => o.mesa === m && o.status !== "delivered",
             );
             const total = mesaOrders.reduce((s, o) => s + calcOrderTotal(o), 0);
@@ -1919,10 +1909,15 @@
       function renderOrders() {
         const grid = document.getElementById("orders-grid");
         let orders = getAllActiveOrders();
+
         if (S.filterMesa !== "all")
           orders = orders.filter((o) => o.mesa === S.filterMesa);
-        if (S.filterStatus !== "all")
+
+        if (S.filterStatus !== "all") {
           orders = orders.filter((o) => o.status === S.filterStatus);
+        } else {
+          orders = orders.filter((o) => o.status !== "delivered");
+        }
 
         if (orders.length === 0) {
           grid.innerHTML = `<div class="empty"><div class="empty-icon">📋</div><div class="empty-lbl">Nenhum pedido</div></div>`;
@@ -1933,7 +1928,9 @@
           .map((o) => {
             const total = calcOrderTotal(o);
             const next = NEXT_STATUS[o.status];
-            return `<div class="order-card">
+            const isDelivered = o.status === "delivered";
+
+            return `<div class="order-card ${isDelivered ? 'is-delivered' : ''}">
       <div class="oc-head">
         <div><div class="oc-mesa">🪑 Mesa ${o.mesa}</div><div class="oc-id">#${o.orderId.slice(-8).toUpperCase()}</div></div>
         <div class="oc-meta">
@@ -1977,7 +1974,6 @@
 
         container.innerHTML = [1, 2, 3, 4]
           .map((m) => {
-            // 🔥 MÁGICA: slice(0, 1) faz com que apareça estritamente o estado atual da mesa
             const mesaSessions = (byMesa[m] || []).slice(0, 1);
 
             if (!mesaSessions.length) {
@@ -2112,15 +2108,18 @@
         const grid = document.getElementById("delivery-grid");
         const db = readDb();
 
-        // Filtra arquivados para NÃO aparecerem mais no delivery (apenas no Relatório)
         let deliveries = (db.deliveries || [])
           .filter((d) => !d.archived)
-          .sort((a, b) => b.createdAt - a.createdAt);
+          .sort((a, b) => a.createdAt - b.createdAt); 
 
-        if (S.deliveryStatusFilter !== "all")
+        // 🔥 FILTRO INTELIGENTE PARA DELIVERY 🔥
+        if (S.deliveryStatusFilter !== "all") {
           deliveries = deliveries.filter(
             (d) => d.status === S.deliveryStatusFilter,
           );
+        } else {
+          deliveries = deliveries.filter((d) => d.status !== "delivered");
+        }
 
         if (!deliveries.length) {
           grid.innerHTML = `<div class="empty"><div class="empty-icon">🛵</div><div class="empty-lbl">Nenhum pedido de delivery</div></div>`;
