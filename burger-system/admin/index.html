@@ -498,6 +498,7 @@
         overflow: hidden;
         transition: border-color 0.2s, opacity 0.3s, filter 0.3s;
         animation: slideUp 0.3s ease;
+        cursor: pointer; /* Feedback visual ao clicar */
       }
       @keyframes slideUp {
         from { opacity: 0; transform: translateY(8px); }
@@ -505,6 +506,7 @@
       }
       .order-card:hover {
         border-color: var(--b2);
+        background: var(--s2);
       }
 
       /* Deixa o card apagado e sem cor quando finalizado */
@@ -597,6 +599,11 @@
         color: var(--acc2);
         font-style: italic;
         margin-top: 1px;
+        /* TRUNCATE no grid principal */
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 200px;
       }
       .oc-row-qty {
         font-family: var(--mono);
@@ -848,7 +855,7 @@
         color: var(--red);
       }
 
-      /* ── Custom Modal ── */
+      /* ── Custom Modal Geral ── */
       .custom-modal-overlay {
         display: none;
         position: fixed;
@@ -939,6 +946,31 @@
       .cm-btn.confirm.green:hover {
         background: #2ea65a;
       }
+
+      /* ── ORDER DETAIL MODAL ── */
+      .detail-modal-overlay {
+        display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+        backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center;
+        padding: 20px; opacity: 0; transition: opacity 0.2s ease;
+      }
+      .detail-modal-overlay.show { display: flex; opacity: 1; }
+      .detail-modal-box {
+        background: var(--s1); border: 1px solid var(--b); border-radius: var(--r);
+        width: 100%; max-width: 480px; display: flex; flex-direction: column;
+        max-height: 85vh; overflow: hidden; transform: translateY(20px) scale(0.95);
+        transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+      .detail-modal-overlay.show .detail-modal-box { transform: translateY(0) scale(1); }
+      .dm-header { padding: 16px 20px; background: var(--s2); border-bottom: 1px solid var(--b); display: flex; justify-content: space-between; align-items: center; }
+      .dm-title { font-family: var(--display); font-size: 20px; font-weight: 800; }
+      .dm-close { background: transparent; border: none; color: var(--muted); font-size: 24px; cursor: pointer; }
+      .dm-body { padding: 20px; overflow-y: auto; flex: 1; }
+      .dm-item { padding: 12px 0; border-bottom: 1px dashed var(--b); }
+      .dm-item:last-child { border-bottom: none; }
+      .dm-item-name { font-size: 15px; font-weight: 600; margin-bottom: 4px; display:flex; justify-content:space-between; }
+      .dm-item-obs { font-size: 13px; color: var(--acc2); font-style: italic; white-space: pre-wrap; line-height: 1.4; }
+      .dm-footer { padding: 16px 20px; background: var(--s2); border-top: 1px solid var(--b); display: flex; justify-content: space-between; align-items: center; }
+      .dm-total { font-family: var(--display); font-size: 24px; font-weight: 800; color: var(--acc); }
 
       /* ── Toast ── */
       .toast {
@@ -1253,11 +1285,16 @@
       </div>
     </div>
 
+    <div class="detail-modal-overlay" id="detail-modal" onclick="closeDetailModal(event)">
+      <div class="detail-modal-box" id="detail-modal-box" onclick="event.stopPropagation()">
+         </div>
+    </div>
+
     <div class="toast" id="toast"></div>
 
     <script>
       /* ═══════════════════════════════════════════════════════════════
-   ADMIN PANEL v2.2 - (SALÃO + DELIVERY + FATURAMENTO INTEGRADO)
+   ADMIN PANEL v2.3 - COM MODAL DE DETALHES DO PEDIDO
 ═══════════════════════════════════════════════════════════════ */
 
       const DB_KEY = "burgerhouse_db_v2";
@@ -1302,102 +1339,18 @@
       }
 
       const DEFAULT_PRODUCTS = [
-        {
-          id: 1,
-          nome: "Smash Clássico",
-          preco: 28.9,
-          categoria: "burger",
-          img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&q=75",
-          disponivel: true,
-        },
-        {
-          id: 2,
-          nome: "Double Smash",
-          preco: 38.9,
-          categoria: "burger",
-          img: "https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=200&q=75",
-          disponivel: true,
-        },
-        {
-          id: 3,
-          nome: "Crispy Chicken",
-          preco: 32.9,
-          categoria: "burger",
-          img: "https://images.unsplash.com/photo-1606755962773-d324e0a13086?w=200&q=75",
-          disponivel: true,
-        },
-        {
-          id: 4,
-          nome: "Veggie Smash",
-          preco: 29.9,
-          categoria: "burger",
-          img: "https://images.unsplash.com/photo-1520072959219-c595dc870360?w=200&q=75",
-          disponivel: true,
-        },
-        {
-          id: 5,
-          nome: "BBQ Bacon",
-          preco: 36.9,
-          categoria: "burger",
-          img: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=200&q=75",
-          disponivel: false,
-        },
-        {
-          id: 6,
-          nome: "Batata Frita P",
-          preco: 12.9,
-          categoria: "acomp",
-          img: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=200&q=75",
-          disponivel: true,
-        },
-        {
-          id: 7,
-          nome: "Batata Frita G",
-          preco: 18.9,
-          categoria: "acomp",
-          img: "https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?w=200&q=75",
-          disponivel: true,
-        },
-        {
-          id: 8,
-          nome: "Onion Rings",
-          preco: 16.9,
-          categoria: "acomp",
-          img: "https://images.unsplash.com/photo-1639024471283-03518883512d?w=200&q=75",
-          disponivel: true,
-        },
-        {
-          id: 9,
-          nome: "Refrigerante",
-          preco: 7.9,
-          categoria: "bebida",
-          img: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=200&q=75",
-          disponivel: true,
-        },
-        {
-          id: 10,
-          nome: "Milk Shake",
-          preco: 19.9,
-          categoria: "bebida",
-          img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=200&q=75",
-          disponivel: true,
-        },
-        {
-          id: 11,
-          nome: "Água Mineral",
-          preco: 5.9,
-          categoria: "bebida",
-          img: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=200&q=75",
-          disponivel: true,
-        },
-        {
-          id: 12,
-          nome: "Brownie",
-          preco: 11.9,
-          categoria: "sobremesa",
-          img: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=200&q=75",
-          disponivel: true,
-        },
+        { id: 1, nome: "Smash Clássico", preco: 28.9, categoria: "burger", img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&q=75", disponivel: true },
+        { id: 2, nome: "Double Smash", preco: 38.9, categoria: "burger", img: "https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=200&q=75", disponivel: true },
+        { id: 3, nome: "Crispy Chicken", preco: 32.9, categoria: "burger", img: "https://images.unsplash.com/photo-1606755962773-d324e0a13086?w=200&q=75", disponivel: true },
+        { id: 4, nome: "Veggie Smash", preco: 29.9, categoria: "burger", img: "https://images.unsplash.com/photo-1520072959219-c595dc870360?w=200&q=75", disponivel: true },
+        { id: 5, nome: "BBQ Bacon", preco: 36.9, categoria: "burger", img: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=200&q=75", disponivel: false },
+        { id: 6, nome: "Batata Frita P", preco: 12.9, categoria: "acomp", img: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=200&q=75", disponivel: true },
+        { id: 7, nome: "Batata Frita G", preco: 18.9, categoria: "acomp", img: "https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?w=200&q=75", disponivel: true },
+        { id: 8, nome: "Onion Rings", preco: 16.9, categoria: "acomp", img: "https://images.unsplash.com/photo-1639024471283-03518883512d?w=200&q=75", disponivel: true },
+        { id: 9, nome: "Refrigerante", preco: 7.9, categoria: "bebida", img: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=200&q=75", disponivel: true },
+        { id: 10, nome: "Milk Shake", preco: 19.9, categoria: "bebida", img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=200&q=75", disponivel: true },
+        { id: 11, nome: "Água Mineral", preco: 5.9, categoria: "bebida", img: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=200&q=75", disponivel: true },
+        { id: 12, nome: "Brownie", preco: 11.9, categoria: "sobremesa", img: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=200&q=75", disponivel: true },
       ];
 
       // Garante que o banco tem a lista base
@@ -1420,16 +1373,12 @@
       function beep(f = 880, d = 0.12, v = 0.25) {
         try {
           if (!_ac) _ac = new AudioCtx();
-          const o = _ac.createOscillator(),
-            g = _ac.createGain();
-          o.connect(g);
-          g.connect(_ac.destination);
-          o.frequency.value = f;
-          o.type = "sine";
+          const o = _ac.createOscillator(), g = _ac.createGain();
+          o.connect(g); g.connect(_ac.destination);
+          o.frequency.value = f; o.type = "sine";
           g.gain.setValueAtTime(v, _ac.currentTime);
           g.gain.exponentialRampToValueAtTime(0.001, _ac.currentTime + d);
-          o.start();
-          o.stop(_ac.currentTime + d);
+          o.start(); o.stop(_ac.currentTime + d);
         } catch (e) {}
       }
       function newOrderSound() {
@@ -1441,36 +1390,13 @@
         beep(660, 0.2, 0.4);
         setTimeout(() => beep(880, 0.2, 0.35), 250);
       }
-      document.addEventListener(
-        "click",
-        () => {
-          try {
-            _ac && _ac.resume();
-          } catch (e) {}
-        },
-        { once: true },
-      );
+      document.addEventListener("click", () => { try { _ac && _ac.resume(); } catch (e) {} }, { once: true });
 
       // ── Helpers ───────────────────────────────────────────────────
-      function fmt(v) {
-        return new Intl.NumberFormat("pt-BR", {
-          style: "currency",
-          currency: "BRL",
-        }).format(v);
-      }
-      function fmtTime(ts) {
-        return new Date(ts).toLocaleTimeString("pt-BR", {
-          hour: "2-digit",
-          minute: "2-digit",
-        });
-      }
-
-      function calcOrderTotal(o) {
-        return o.itens.reduce((s, i) => s + i.preco * i.quantidade, 0);
-      }
-      function calcSessionTotal(sess) {
-        return (sess.orders || []).reduce((s, o) => s + calcOrderTotal(o), 0);
-      }
+      function fmt(v) { return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v); }
+      function fmtTime(ts) { return new Date(ts).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }); }
+      function calcOrderTotal(o) { return o.itens.reduce((s, i) => s + i.preco * i.quantidade, 0); }
+      function calcSessionTotal(sess) { return (sess.orders || []).reduce((s, o) => s + calcOrderTotal(o), 0); }
 
       function getAllActiveOrders() {
         const db = readDb();
@@ -1490,30 +1416,12 @@
         );
       }
 
-      const STATUS_LABEL = {
-        pending: "⏳ Aguardando",
-        preparing: "🔥 Em Preparo",
-        done: "✅ Pronto",
-        delivered: "🎉 Entregue",
-      };
-      const STATUS_CLASS = {
-        pending: "st-pending",
-        preparing: "st-preparing",
-        done: "st-done",
-        delivered: "st-delivered",
-      };
-      const NEXT_STATUS = {
-        pending: "preparing",
-        preparing: "done",
-        done: "delivered",
-      };
-      const NEXT_LABEL = {
-        pending: "▶ Iniciar",
-        preparing: "✓ Pronto",
-        done: "🎉 Entregar",
-      };
+      const STATUS_LABEL = { pending: "⏳ Aguardando", preparing: "🔥 Em Preparo", done: "✅ Pronto", delivered: "🎉 Entregue" };
+      const STATUS_CLASS = { pending: "st-pending", preparing: "st-preparing", done: "st-done", delivered: "st-delivered" };
+      const NEXT_STATUS = { pending: "preparing", preparing: "done", done: "delivered" };
+      const NEXT_LABEL = { pending: "▶ Iniciar", preparing: "✓ Pronto", done: "🎉 Entregar" };
 
-      // ── Modais ───────────────────────────────────────
+      // ── Modais Genéricos ───────────────────────────────────────
       let _modalCallback = null;
       function openModal(title, text, confirmText, type, onConfirm) {
         document.getElementById("cm-title").textContent = title;
@@ -1535,9 +1443,104 @@
         setTimeout(() => (modal.style.display = "none"), 200);
         _modalCallback = null;
       }
-      function confirmModal() {
-        if (_modalCallback) _modalCallback();
-        closeModal();
+      function confirmModal() { if (_modalCallback) _modalCallback(); closeModal(); }
+
+      // ── Modal de DETALHES DO PEDIDO ──
+      function openOrderDetail(type, orderId, parentId) {
+        const db = readDb();
+        let orderData = null;
+        let titleText = "";
+        let metaText = "";
+        
+        if (type === "salao") {
+          const sess = db.sessions.find(s => s.sessionId === parentId);
+          if(!sess) return;
+          orderData = sess.orders.find(o => o.orderId === orderId);
+          titleText = `Mesa ${sess.mesa}`;
+          metaText = `Pedido #${orderId.slice(-6).toUpperCase()}`;
+        } else if (type === "delivery") {
+          orderData = db.deliveries.find(d => d.deliveryId === orderId);
+          titleText = `🛵 Delivery`;
+          metaText = `Pedido #${orderId.slice(-6).toUpperCase()}`;
+        }
+        
+        if(!orderData) return;
+
+        const total = type === "delivery" ? orderData.total : calcOrderTotal(orderData);
+        const next = NEXT_STATUS[orderData.status];
+        let actionBtn = "";
+
+        if (next) {
+           actionBtn = `<button class="act${orderData.status === "preparing" ? " green" : ""}" style="font-size: 14px; padding: 10px 20px;" onclick="advanceStatusFromModal('${type}', '${parentId}', '${orderId}', '${next}')">${NEXT_LABEL[orderData.status]}</button>`;
+        } else {
+           actionBtn = `<span style="font-size:14px;color:var(--muted); font-weight:600;">Pedido Finalizado</span>`;
+        }
+
+        const box = document.getElementById("detail-modal-box");
+        box.innerHTML = `
+          <div class="dm-header">
+             <div>
+                <div class="dm-title">${titleText}</div>
+                <div style="font-size:12px; color:var(--muted);">${metaText}</div>
+             </div>
+             <button class="dm-close" onclick="closeDetailModal(event, true)">✕</button>
+          </div>
+          <div class="dm-body">
+             <div style="margin-bottom: 20px; display:flex; justify-content:space-between; align-items:center;">
+                <span class="status-tag ${STATUS_CLASS[orderData.status]}">${STATUS_LABEL[orderData.status]}</span>
+                <span style="font-family:var(--mono); font-size:12px; color:var(--muted)">${fmtTime(orderData.createdAt)}</span>
+             </div>
+             
+             <h4 style="font-size:11px; text-transform:uppercase; color:var(--muted); margin-bottom:10px; letter-spacing:1px;">Itens do Pedido</h4>
+             
+             ${orderData.itens.map(i => `
+               <div class="dm-item">
+                  <div class="dm-item-name">
+                    <span>${i.quantidade}x ${i.nome}</span>
+                    <span>${fmt(i.preco * i.quantidade)}</span>
+                  </div>
+                  ${i.observacao ? `<div class="dm-item-obs">${i.observacao}</div>` : ''}
+               </div>
+             `).join("")}
+
+             ${type === "delivery" ? `
+               <div style="margin-top:20px; padding-top:14px; border-top:1px solid var(--b);">
+                  <h4 style="font-size:11px; text-transform:uppercase; color:var(--muted); margin-bottom:10px; letter-spacing:1px;">Dados da Entrega</h4>
+                  <div style="font-size:13px; color:var(--text); line-height:1.5;">
+                    <b>${orderData.cliente.nome}</b><br>
+                    ${orderData.endereco.rua}, ${orderData.endereco.numero} ${orderData.endereco.complemento ? ` - ${orderData.endereco.complemento}` : ''}<br>
+                    ${orderData.endereco.bairro}<br>
+                    Pagamento: <b>${orderData.pagamento.metodo.toUpperCase()}</b> ${orderData.pagamento.troco ? `(Troco para ${fmt(orderData.pagamento.troco)})` : ''}
+                  </div>
+               </div>
+             ` : ''}
+          </div>
+          <div class="dm-footer">
+             <div class="dm-total">${fmt(total)}</div>
+             ${actionBtn}
+          </div>
+        `;
+
+        const overlay = document.getElementById("detail-modal");
+        overlay.style.display = "flex";
+        setTimeout(() => overlay.classList.add("show"), 10);
+      }
+
+      function closeDetailModal(e, force = false) {
+        if (force || e.target.id === "detail-modal") {
+          const overlay = document.getElementById("detail-modal");
+          overlay.classList.remove("show");
+          setTimeout(() => { overlay.style.display = "none"; }, 200);
+        }
+      }
+
+      function advanceStatusFromModal(type, parentId, orderId, nextStatus) {
+         if (type === "salao") {
+            setOrderStatus(parentId, orderId, nextStatus);
+         } else if (type === "delivery") {
+            setDeliveryStatus(orderId, nextStatus);
+         }
+         closeDetailModal(null, true);
       }
 
       // ── Update order status ───────────────────────────────────────
@@ -1551,347 +1554,152 @@
         o.updatedAt = Date.now();
         sess.updatedAt = Date.now();
         db.notifications = db.notifications || [];
-        db.notifications.unshift({
-          type: "order:status",
-          sessionId,
-          mesa: sess.mesa,
-          orderId,
-          status,
-          id: Date.now(),
-          read: false,
-          ts: Date.now(),
-        });
+        db.notifications.unshift({ type: "order:status", sessionId, mesa: sess.mesa, orderId, status, id: Date.now(), read: false, ts: Date.now() });
         writeDb(db);
         refresh();
         showToast(`Mesa ${sess.mesa} — ${STATUS_LABEL[status]}`);
       }
 
       function closeSession(sessionId) {
-        openModal(
-          "Encerrar Mesa",
-          "O cliente não poderá mais fazer novos pedidos.",
-          "🔒 Encerrar",
-          "red",
-          () => {
+        openModal("Encerrar Mesa", "O cliente não poderá mais fazer novos pedidos.", "🔒 Encerrar", "red", () => {
             const db = readDb();
             const sess = db.sessions.find((s) => s.sessionId === sessionId);
             if (!sess) return;
-            sess.status = "closed";
-            sess.closedAt = Date.now();
-            sess.updatedAt = Date.now();
-            writeDb(db);
-            refresh();
-            showToast(`Mesa ${sess.mesa} encerrada`);
-          },
-        );
+            sess.status = "closed"; sess.closedAt = Date.now(); sess.updatedAt = Date.now();
+            writeDb(db); refresh(); showToast(`Mesa ${sess.mesa} encerrada`);
+        });
       }
 
       function zerarCaixa() {
-        openModal(
-          "Zerar Caixa do Dia",
-          "Esta ação vai limpar o painel. Mesas e deliveries sumirão da tela inicial, mas o faturamento continuará <b>salvo no Relatório</b>.",
-          "🧹 Zerar Painel",
-          "red",
-          () => {
+        openModal("Zerar Caixa do Dia", "Esta ação vai limpar o painel. Mesas e deliveries sumirão da tela inicial, mas o faturamento continuará <b>salvo no Relatório</b>.", "🧹 Zerar Painel", "red", () => {
             const dbAtualizado = readDb();
-            // Força o encerramento e arquiva tudo que estiver no painel
             (dbAtualizado.sessions || []).forEach((sess) => {
-              if (sess.status === "open") {
-                  sess.status = "closed";
-                  sess.closedAt = Date.now();
-              }
+              if (sess.status === "open") { sess.status = "closed"; sess.closedAt = Date.now(); }
               sess.archived = true;
             });
-            (dbAtualizado.deliveries || []).forEach((del) => {
-              del.archived = true;
-            });
-            writeDb(dbAtualizado);
-            refresh();
-            showToast("Caixa zerado! Dados arquivados com sucesso.", "ok");
-          },
-        );
+            (dbAtualizado.deliveries || []).forEach((del) => { del.archived = true; });
+            writeDb(dbAtualizado); refresh(); showToast("Caixa zerado! Dados arquivados com sucesso.", "ok");
+        });
       }
 
       function resetAppCompleto() {
-        openModal(
-          "Apagar Sistema",
-          "Você está prestes a apagar <b>TODO O HISTÓRICO</b>.<br><br>Faturamento, pedidos e relatórios serão perdidos permanentemente.",
-          "⚠️ APAGAR TUDO",
-          "red",
-          () => {
-            const dbVazio = {
-              version: DB_VER,
-              sessions: [],
-              notifications: [],
-              deliveries: [],
-              products: JSON.parse(JSON.stringify(DEFAULT_PRODUCTS)),
-              updatedAt: Date.now(),
-            };
-            localStorage.setItem(DB_KEY, JSON.stringify(dbVazio));
-            refresh();
-            showToast("Sistema completamente zerado.");
-          },
-        );
+        openModal("Apagar Sistema", "Você está prestes a apagar <b>TODO O HISTÓRICO</b>.<br><br>Faturamento, pedidos e relatórios serão perdidos permanentemente.", "⚠️ APAGAR TUDO", "red", () => {
+            const dbVazio = { version: DB_VER, sessions: [], notifications: [], deliveries: [], products: JSON.parse(JSON.stringify(DEFAULT_PRODUCTS)), updatedAt: Date.now() };
+            localStorage.setItem(DB_KEY, JSON.stringify(dbVazio)); refresh(); showToast("Sistema completamente zerado.");
+        });
       }
 
       function forcarReativacaoMesa(numeroMesa) {
-        openModal(
-          "Reativar Mesa " + numeroMesa,
-          "Isso criará uma nova sessão ativa para esta mesa.",
-          "Abrir Mesa",
-          "green",
-          () => {
+        openModal("Reativar Mesa " + numeroMesa, "Isso criará uma nova sessão ativa para esta mesa.", "Abrir Mesa", "green", () => {
             const db = readDb();
-            const tokenMap = {
-              1: "tok_mesa1_abc123",
-              2: "tok_mesa2_def456",
-              3: "tok_mesa3_ghi789",
-              4: "tok_mesa4_jkl012",
-            };
-            const novaSessao = {
-              sessionId: `sess_${numeroMesa}_${Date.now()}`,
-              mesa: numeroMesa,
-              token: tokenMap[numeroMesa],
-              status: "open",
-              orders: [],
-              archived: false,
-              garcomChamado: false,
-              createdAt: Date.now(),
-              updatedAt: Date.now(),
-            };
-            db.sessions.push(novaSessao);
-            writeDb(db);
-            refresh();
-            showToast(`Mesa ${numeroMesa} reativada com sucesso!`);
-          },
-        );
+            const tokenMap = { 1: "tok_mesa1_abc123", 2: "tok_mesa2_def456", 3: "tok_mesa3_ghi789", 4: "tok_mesa4_jkl012" };
+            const novaSessao = { sessionId: `sess_${numeroMesa}_${Date.now()}`, mesa: numeroMesa, token: tokenMap[numeroMesa], status: "open", orders: [], archived: false, garcomChamado: false, createdAt: Date.now(), updatedAt: Date.now() };
+            db.sessions.push(novaSessao); writeDb(db); refresh(); showToast(`Mesa ${numeroMesa} reativada com sucesso!`);
+        });
       }
 
       function toggleProduct(id) {
         const db = readDb();
         const p = db.products.find((prod) => prod.id === id);
         if (!p) return;
-        p.disponivel = !p.disponivel;
-        writeDb(db);
-        renderCardapio();
-        showToast(
-          `${p.nome}: ${p.disponivel ? "✅ Ativado" : "❌ Desativado"}`,
-        );
+        p.disponivel = !p.disponivel; writeDb(db); renderCardapio(); showToast(`${p.nome}: ${p.disponivel ? "✅ Ativado" : "❌ Desativado"}`);
       }
 
       function dismissAllWaiters() {
         const db = readDb();
-        (db.sessions || []).forEach((s) => {
-          s.garcomChamado = false;
-          s.updatedAt = Date.now();
-        });
-        writeDb(db);
-        document.getElementById("waiter-alert").classList.remove("show");
-        showToast("Chamado de garçom dispensado");
+        (db.sessions || []).forEach((s) => { s.garcomChamado = false; s.updatedAt = Date.now(); });
+        writeDb(db); document.getElementById("waiter-alert").classList.remove("show"); showToast("Chamado de garçom dispensado");
       }
 
-      // ── Gestão de Status da Loja ────────────────────────────────────
-      function getLojaState() {
-        const db = readDb();
-        return db.lojaAberta !== false;
-      }
+      function getLojaState() { const db = readDb(); return db.lojaAberta !== false; }
 
       function renderLojaStatus() {
         const isAberto = getLojaState();
         const btn = document.getElementById("btn-loja-status");
-        if (isAberto) {
-          btn.className = "live-pill";
-          btn.innerHTML = '<div class="live-dot"></div> LOJA ABERTA';
-        } else {
-          btn.className = "live-pill closed";
-          btn.innerHTML = '<div class="live-dot closed"></div> LOJA FECHADA';
-        }
+        if (isAberto) { btn.className = "live-pill"; btn.innerHTML = '<div class="live-dot"></div> LOJA ABERTA'; } 
+        else { btn.className = "live-pill closed"; btn.innerHTML = '<div class="live-dot closed"></div> LOJA FECHADA'; }
       }
 
       function toggleLojaStatus() {
         const db = readDb();
         const isAberto = db.lojaAberta !== false;
 
-        const mesasAbertas = (db.sessions || []).filter(
-          (s) => s.status === "open" && !s.archived,
-        );
-        const deliveryPendente = (db.deliveries || []).some(
-          (d) => d.status !== "delivered" && !d.archived,
-        );
+        const mesasAbertas = (db.sessions || []).filter((s) => s.status === "open" && !s.archived);
+        const deliveryPendente = (db.deliveries || []).some((d) => d.status !== "delivered" && !d.archived);
 
         let warningText = "";
         if (isAberto) {
-          if (mesasAbertas.length > 0 || deliveryPendente) {
-            warningText = `<br><br><span style='color: var(--acc2); font-size: 11px;'>⚠️ <b>Atenção:</b> Fechar a loja agora irá <b>encerrar e limpar</b> automaticamente todas as mesas abertas e arquivar todos os deliveries. Os dados irão para o Relatório.</span>`;
-          } else {
-            warningText =
-              "<br><br><span style='color: var(--muted); font-size: 11px;'>Nenhuma mesa aberta no momento. O cardápio será bloqueado para novos pedidos.</span>";
-          }
+          if (mesasAbertas.length > 0 || deliveryPendente) { warningText = `<br><br><span style='color: var(--acc2); font-size: 11px;'>⚠️ <b>Atenção:</b> Fechar a loja agora irá <b>encerrar e limpar</b> automaticamente todas as mesas abertas e arquivar todos os deliveries. Os dados irão para o Relatório.</span>`; } 
+          else { warningText = "<br><br><span style='color: var(--muted); font-size: 11px;'>Nenhuma mesa aberta no momento. O cardápio será bloqueado para novos pedidos.</span>"; }
         }
 
         const title = isAberto ? "Fechar Hamburgueria" : "Abrir Hamburgueria";
-        const msg = isAberto
-          ? `Tem certeza que deseja <b>fechar</b> a loja?${warningText}`
-          : "Tem certeza que deseja <b>abrir</b> a loja?<br>Isso irá <b>reativar todas as mesas (1 a 4)</b> automaticamente para novos clientes.";
-
+        const msg = isAberto ? `Tem certeza que deseja <b>fechar</b> a loja?${warningText}` : "Tem certeza que deseja <b>abrir</b> a loja?<br>Isso irá <b>reativar todas as mesas (1 a 4)</b> automaticamente para novos clientes.";
         const confirmBtn = isAberto ? "🔒 Fechar Loja" : "🟢 Abrir Loja";
         const colorType = isAberto ? "red" : "green";
 
         openModal(title, msg, confirmBtn, colorType, () => {
           const dbAtualizado = readDb();
-
           if (isAberto) {
-            // FECHAR: Zera o caixa automaticamente (arquiva e encerra tudo)
-            (dbAtualizado.sessions || []).forEach((sess) => {
-              sess.status = "closed";
-              sess.closedAt = Date.now();
-              sess.updatedAt = Date.now();
-              sess.archived = true; 
-            });
-            (dbAtualizado.deliveries || []).forEach((del) => {
-              del.archived = true;
-            });
+            (dbAtualizado.sessions || []).forEach((sess) => { sess.status = "closed"; sess.closedAt = Date.now(); sess.updatedAt = Date.now(); sess.archived = true; });
+            (dbAtualizado.deliveries || []).forEach((del) => { del.archived = true; });
           } else {
-            // ABRIR: Reativa automaticamente as mesas de 1 a 4 se estiverem fechadas
-            const tokenMap = {
-              1: "tok_mesa1_abc123",
-              2: "tok_mesa2_def456",
-              3: "tok_mesa3_ghi789",
-              4: "tok_mesa4_jkl012",
-            };
+            const tokenMap = { 1: "tok_mesa1_abc123", 2: "tok_mesa2_def456", 3: "tok_mesa3_ghi789", 4: "tok_mesa4_jkl012" };
             [1, 2, 3, 4].forEach((m) => {
-              const jaAberta = (dbAtualizado.sessions || []).some(
-                (s) => s.mesa === m && s.status === "open" && !s.archived,
-              );
-              if (!jaAberta) {
-                dbAtualizado.sessions.push({
-                  sessionId: `sess_${m}_${Date.now()}`,
-                  mesa: m,
-                  token: tokenMap[m],
-                  status: "open",
-                  orders: [],
-                  archived: false,
-                  garcomChamado: false,
-                  createdAt: Date.now(),
-                  updatedAt: Date.now(),
-                });
-              }
+              const jaAberta = (dbAtualizado.sessions || []).some((s) => s.mesa === m && s.status === "open" && !s.archived);
+              if (!jaAberta) { dbAtualizado.sessions.push({ sessionId: `sess_${m}_${Date.now()}`, mesa: m, token: tokenMap[m], status: "open", orders: [], archived: false, garcomChamado: false, createdAt: Date.now(), updatedAt: Date.now() }); }
             });
           }
-
-          dbAtualizado.lojaAberta = !isAberto;
-          writeDb(dbAtualizado);
-          renderLojaStatus();
-          refresh(); // Atualiza a interface
-
-          showToast(
-            `Hamburgueria ${!isAberto ? "ABERTA" : "FECHADA e Caixa Zerado"} com sucesso!`,
-            !isAberto ? "ok" : "err",
-          );
+          dbAtualizado.lojaAberta = !isAberto; writeDb(dbAtualizado); renderLojaStatus(); refresh(); showToast(`Hamburgueria ${!isAberto ? "ABERTA" : "FECHADA e Caixa Zerado"} com sucesso!`, !isAberto ? "ok" : "err");
         });
       }
 
-      // ── Render: Main stats ────────────────────────────────────────
       function renderStats() {
         const db = readDb();
         const sessions = db.sessions || [];
         const deliveries = db.deliveries || [];
+        const isToday = (ts) => new Date(ts).toDateString() === new Date().toDateString();
 
-        const isToday = (ts) =>
-          new Date(ts).toDateString() === new Date().toDateString();
-
-        // Ignora os pedidos arquivados para o Caixa poder zerar na tela principal!
-        const fatMesas = sessions.reduce(
-          (s, sess) =>
-            !sess.archived && isToday(sess.createdAt)
-              ? s + calcSessionTotal(sess)
-              : s,
-          0,
-        );
-        const fatDelivery = deliveries.reduce(
-          (s, del) =>
-            !del.archived && isToday(del.createdAt) ? s + (del.total || 0) : s,
-          0,
-        );
+        const fatMesas = sessions.reduce((s, sess) => !sess.archived && isToday(sess.createdAt) ? s + calcSessionTotal(sess) : s, 0);
+        const fatDelivery = deliveries.reduce((s, del) => !del.archived && isToday(del.createdAt) ? s + (del.total || 0) : s, 0);
         const fatTotal = fatMesas + fatDelivery;
 
-        // Ativos e Prontos
-        const ativosMesa = sessions
-          .filter((s) => !s.archived)
-          .flatMap((s) => s.orders || [])
-          .filter((o) => o.status !== "delivered").length;
-        const ativosDelivery = deliveries.filter(
-          (d) => !d.archived && d.status !== "delivered",
-        ).length;
+        const ativosMesa = sessions.filter((s) => !s.archived).flatMap((s) => s.orders || []).filter((o) => o.status !== "delivered").length;
+        const ativosDelivery = deliveries.filter((d) => !d.archived && d.status !== "delivered").length;
+        const prontosMesa = sessions.filter((s) => !s.archived).flatMap((s) => s.orders || []).filter((o) => o.status === "done").length;
+        const prontosDelivery = deliveries.filter((d) => !d.archived && d.status === "done").length;
 
-        const prontosMesa = sessions
-          .filter((s) => !s.archived)
-          .flatMap((s) => s.orders || [])
-          .filter((o) => o.status === "done").length;
-        const prontosDelivery = deliveries.filter(
-          (d) => !d.archived && d.status === "done",
-        ).length;
-
-        document.getElementById("sb-ativos").textContent =
-          ativosMesa + ativosDelivery;
+        document.getElementById("sb-ativos").textContent = ativosMesa + ativosDelivery;
         document.getElementById("sb-fat").textContent = fmt(fatTotal);
-        document.getElementById("sb-prontos").textContent =
-          prontosMesa + prontosDelivery;
+        document.getElementById("sb-prontos").textContent = prontosMesa + prontosDelivery;
 
-        // Alerta Garçom
-        const waiterSessions = sessions.filter(
-          (s) => s.garcomChamado && s.status === "open",
-        );
+        const waiterSessions = sessions.filter((s) => s.garcomChamado && s.status === "open");
         const wBtn = document.getElementById("waiter-alert");
         if (waiterSessions.length > 0) {
           wBtn.classList.add("show");
           wBtn.textContent = `🔔 GARÇOM — Mesa${waiterSessions.length > 1 ? "s" : ""} ${waiterSessions.map((s) => s.mesa).join(", ")} — clique para dispensar`;
-        } else {
-          wBtn.classList.remove("show");
-        }
+        } else { wBtn.classList.remove("show"); }
 
-        // Sidebar badges (Mesa)
         [1, 2, 3, 4].forEach((m) => {
-          const c = sessions
-            .filter((s) => s.mesa === m && !s.archived)
-            .flatMap((s) => s.orders)
-            .filter((o) => o.status !== "delivered").length;
+          const c = sessions.filter((s) => s.mesa === m && !s.archived).flatMap((s) => s.orders).filter((o) => o.status !== "delivered").length;
           const el = document.getElementById(`fc-${m}`);
-          if (el) {
-            el.textContent = c;
-            el.className = `nav-pill${c > 0 ? "" : " zero"}`;
-          }
+          if (el) { el.textContent = c; el.className = `nav-pill${c > 0 ? "" : " zero"}`; }
         });
 
         const fcAll = document.getElementById("fc-all");
-        if (fcAll) {
-          fcAll.textContent = ativosMesa;
-          fcAll.className = `nav-pill${ativosMesa > 0 ? "" : " zero"}`;
-        }
-
+        if (fcAll) { fcAll.textContent = ativosMesa; fcAll.className = `nav-pill${ativosMesa > 0 ? "" : " zero"}`; }
         const npP = document.getElementById("np-pedidos");
-        if (npP) {
-          npP.textContent = ativosMesa;
-          npP.className = `nav-pill${ativosMesa > 0 ? "" : " zero"}`;
-        }
-
+        if (npP) { npP.textContent = ativosMesa; npP.className = `nav-pill${ativosMesa > 0 ? "" : " zero"}`; }
         const elDeliv = document.getElementById("np-delivery");
-        if (elDeliv) {
-          elDeliv.textContent = ativosDelivery;
-          elDeliv.className = `nav-pill${ativosDelivery > 0 ? "" : " zero"}`;
-        }
+        if (elDeliv) { elDeliv.textContent = ativosDelivery; elDeliv.className = `nav-pill${ativosDelivery > 0 ? "" : " zero"}`; }
       }
 
-      // ── Render: Mesa cards ────────────────────────────────────────
       function renderMesaCards() {
         const grid = document.getElementById("mesa-grid");
         const allOrders = getAllActiveOrders();
         
-        grid.innerHTML = [1, 2, 3, 4]
-          .map((m) => {
-            const mesaOrders = allOrders.filter(
-              (o) => o.mesa === m && o.status !== "delivered",
-            );
+        grid.innerHTML = [1, 2, 3, 4].map((m) => {
+            const mesaOrders = allOrders.filter((o) => o.mesa === m && o.status !== "delivered");
             const total = mesaOrders.reduce((s, o) => s + calcOrderTotal(o), 0);
             const hasDone = mesaOrders.some((o) => o.status === "done");
             const isActive = mesaOrders.length > 0;
@@ -1902,35 +1710,29 @@
       <div class="mesa-card-total">${total > 0 ? fmt(total) : "—"}</div>
       ${hasDone ? '<div class="mesa-tag-done">PRONTO!</div>' : ""}
     </div>`;
-          })
-          .join("");
+          }).join("");
       }
 
       function renderOrders() {
         const grid = document.getElementById("orders-grid");
         let orders = getAllActiveOrders();
 
-        if (S.filterMesa !== "all")
-          orders = orders.filter((o) => o.mesa === S.filterMesa);
-
-        if (S.filterStatus !== "all") {
-          orders = orders.filter((o) => o.status === S.filterStatus);
-        } else {
-          orders = orders.filter((o) => o.status !== "delivered");
-        }
+        if (S.filterMesa !== "all") orders = orders.filter((o) => o.mesa === S.filterMesa);
+        if (S.filterStatus !== "all") { orders = orders.filter((o) => o.status === S.filterStatus); } 
+        else { orders = orders.filter((o) => o.status !== "delivered"); }
 
         if (orders.length === 0) {
           grid.innerHTML = `<div class="empty"><div class="empty-icon">📋</div><div class="empty-lbl">Nenhum pedido</div></div>`;
           return;
         }
 
-        grid.innerHTML = orders
-          .map((o) => {
+        grid.innerHTML = orders.map((o) => {
             const total = calcOrderTotal(o);
             const next = NEXT_STATUS[o.status];
             const isDelivered = o.status === "delivered";
 
-            return `<div class="order-card ${isDelivered ? 'is-delivered' : ''}">
+            // Card agora possui onclick e a observação usa truncate
+            return `<div class="order-card ${isDelivered ? 'is-delivered' : ''}" onclick="openOrderDetail('salao', '${o.orderId}', '${o.sessionId}')">
       <div class="oc-head">
         <div><div class="oc-mesa">🪑 Mesa ${o.mesa}</div><div class="oc-id">#${o.orderId.slice(-8).toUpperCase()}</div></div>
         <div class="oc-meta">
@@ -1939,57 +1741,34 @@
         </div>
       </div>
       <div class="oc-items">
-        ${o.itens
-          .map(
-            (i) => `<div class="oc-row">
+        ${o.itens.map((i) => `<div class="oc-row">
           <div><span class="oc-row-name">${i.quantidade}x ${i.nome}</span>${i.observacao ? `<span class="oc-row-obs">📝 ${i.observacao}</span>` : ""}</div>
           <div style="display:flex;gap:8px;align-items:center"><span class="oc-row-val">${fmt(i.preco * i.quantidade)}</span></div>
-        </div>`,
-          )
-          .join("")}
+        </div>`).join("")}
       </div>
       <div class="oc-foot">
         <div class="oc-total">${fmt(total)}</div>
         <div class="oc-actions">
-          ${next ? `<button class="act${o.status === "preparing" ? " green" : ""}" onclick="setOrderStatus('${o.sessionId}','${o.orderId}','${next}')">${NEXT_LABEL[o.status]}</button>` : '<span style="font-size:11px;color:var(--muted)">Concluído</span>'}
+          ${next ? `<button class="act${o.status === "preparing" ? " green" : ""}" onclick="event.stopPropagation(); setOrderStatus('${o.sessionId}','${o.orderId}','${next}')">${NEXT_LABEL[o.status]}</button>` : '<span style="font-size:11px;color:var(--muted)">Concluído</span>'}
         </div>
       </div>
     </div>`;
-          })
-          .join("");
+          }).join("");
       }
 
       function renderSessions() {
         const db = readDb();
-        const sessions = (db.sessions || [])
-          .filter((s) => !s.archived)
-          .sort((a, b) => b.createdAt - a.createdAt);
+        const sessions = (db.sessions || []).filter((s) => !s.archived).sort((a, b) => b.createdAt - a.createdAt);
         const container = document.getElementById("sessions-list");
-
         const byMesa = {};
-        sessions.forEach((s) => {
-          if (!byMesa[s.mesa]) byMesa[s.mesa] = [];
-          byMesa[s.mesa].push(s);
-        });
+        sessions.forEach((s) => { if (!byMesa[s.mesa]) byMesa[s.mesa] = []; byMesa[s.mesa].push(s); });
 
-        container.innerHTML = [1, 2, 3, 4]
-          .map((m) => {
+        container.innerHTML = [1, 2, 3, 4].map((m) => {
             const mesaSessions = (byMesa[m] || []).slice(0, 1);
-
             if (!mesaSessions.length) {
-              return `<div class="session-card">
-                  <div class="sess-head">
-                    <div class="sess-title">🪑 Mesa ${m}</div>
-                    <span class="sess-status ss-closed">Sem sessão</span>
-                  </div>
-                  <div class="sess-body">
-                    <button class="reopen-sess-btn" onclick="forcarReativacaoMesa(${m})" style="width: 100%;">➕ REATIVAR MESA AGORA</button>
-                  </div>
-                </div>`;
+              return `<div class="session-card"><div class="sess-head"><div class="sess-title">🪑 Mesa ${m}</div><span class="sess-status ss-closed">Sem sessão</span></div><div class="sess-body"><button class="reopen-sess-btn" onclick="forcarReativacaoMesa(${m})" style="width: 100%;">➕ REATIVAR MESA AGORA</button></div></div>`;
             }
-
-            return mesaSessions
-              .map((sess, i) => {
+            return mesaSessions.map((sess, i) => {
                 const total = calcSessionTotal(sess);
                 const isLatest = i === 0;
                 return `<div class="session-card">
@@ -2008,54 +1787,27 @@
           </div>
         </div>
       </div>`;
-              })
-              .join("");
-          })
-          .join("");
+              }).join("");
+          }).join("");
       }
 
       function renderReport() {
         const db = readDb();
         const sessions = db.sessions || [];
         const deliveries = db.deliveries || [];
-        const isToday = (ts) =>
-          new Date(ts).toDateString() === new Date().toDateString();
+        const isToday = (ts) => new Date(ts).toDateString() === new Date().toDateString();
 
-        // No relatório mostramos TUDO de hoje, inclusive o que foi arquivado
-        const allOrders = sessions.flatMap((s) =>
-          s.orders.map((o) => ({ ...o, mesa: s.mesa })),
-        );
-
-        const fatMesas = sessions.reduce(
-          (s, sess) =>
-            isToday(sess.createdAt) ? s + calcSessionTotal(sess) : s,
-          0,
-        );
-        const fatDelivery = deliveries.reduce(
-          (s, del) => (isToday(del.createdAt) ? s + (del.total || 0) : s),
-          0,
-        );
+        const allOrders = sessions.flatMap((s) => s.orders.map((o) => ({ ...o, mesa: s.mesa })));
+        const fatMesas = sessions.reduce((s, sess) => isToday(sess.createdAt) ? s + calcSessionTotal(sess) : s, 0);
+        const fatDelivery = deliveries.reduce((s, del) => (isToday(del.createdAt) ? s + (del.total || 0) : s), 0);
         const fatTotal = fatMesas + fatDelivery;
-
         const todayMesas = allOrders.filter((o) => isToday(o.createdAt)).length;
-        const todayDeliv = deliveries.filter((d) =>
-          isToday(d.createdAt),
-        ).length;
+        const todayDeliv = deliveries.filter((d) => isToday(d.createdAt)).length;
 
         const itemCount = {};
-        allOrders.forEach((o) =>
-          o.itens.forEach((i) => {
-            itemCount[i.nome] = (itemCount[i.nome] || 0) + i.quantidade;
-          }),
-        );
-        deliveries.forEach((d) =>
-          (d.itens || []).forEach((i) => {
-            itemCount[i.nome] = (itemCount[i.nome] || 0) + i.quantidade;
-          }),
-        );
-        const topItems = Object.entries(itemCount)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 5);
+        allOrders.forEach((o) => o.itens.forEach((i) => { itemCount[i.nome] = (itemCount[i.nome] || 0) + i.quantidade; }));
+        deliveries.forEach((d) => (d.itens || []).forEach((i) => { itemCount[i.nome] = (itemCount[i.nome] || 0) + i.quantidade; }));
+        const topItems = Object.entries(itemCount).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
         const container = document.getElementById("report-grid");
         container.innerHTML = `
@@ -2068,16 +1820,13 @@
     <div class="rep-card">
       <h3>🏆 Itens Mais Pedidos</h3>
       ${topItems.length ? topItems.map(([nome, qty]) => `<div class="rep-item"><span>${nome}</span><span class="rep-val">${qty}×</span></div>`).join("") : '<div style="color:var(--muted);font-size:13px;padding:8px 0">Sem dados</div>'}
-    </div>
-  `;
+    </div>`;
       }
 
       function renderCardapio() {
         const db = readDb();
         const grid = document.getElementById("prod-grid");
-        grid.innerHTML = (db.products || [])
-          .map(
-            (p) => `
+        grid.innerHTML = (db.products || []).map((p) => `
     <div class="prod-card">
       <img class="prod-thumb" src="${p.img}" alt="${p.nome}" onerror="this.style.display='none'"/>
       <div class="prod-info">
@@ -2089,75 +1838,42 @@
           ${p.disponivel ? "✅ Disponível" : "❌ Indisponível"}
         </button>
       </div>
-    </div>`,
-          )
-          .join("");
+    </div>`).join("");
       }
 
-      // ── DELIVERY RENDER ──────────────────────────────────────────────
       function filterDeliveryStatus(s, btn) {
         S.deliveryStatusFilter = s;
-        document
-          .querySelectorAll("#view-delivery .fpill")
-          .forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-        renderDelivery();
+        document.querySelectorAll("#view-delivery .fpill").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active"); renderDelivery();
       }
 
       function renderDelivery() {
         const grid = document.getElementById("delivery-grid");
         const db = readDb();
 
-        let deliveries = (db.deliveries || [])
-          .filter((d) => !d.archived)
-          .sort((a, b) => a.createdAt - b.createdAt); 
+        let deliveries = (db.deliveries || []).filter((d) => !d.archived).sort((a, b) => a.createdAt - b.createdAt); 
 
-        // 🔥 FILTRO INTELIGENTE PARA DELIVERY 🔥
-        if (S.deliveryStatusFilter !== "all") {
-          deliveries = deliveries.filter(
-            (d) => d.status === S.deliveryStatusFilter,
-          );
-        } else {
-          deliveries = deliveries.filter((d) => d.status !== "delivered");
-        }
+        if (S.deliveryStatusFilter !== "all") { deliveries = deliveries.filter((d) => d.status === S.deliveryStatusFilter); } 
+        else { deliveries = deliveries.filter((d) => d.status !== "delivered"); }
 
         if (!deliveries.length) {
           grid.innerHTML = `<div class="empty"><div class="empty-icon">🛵</div><div class="empty-lbl">Nenhum pedido de delivery</div></div>`;
           return;
         }
 
-        const DLABELS = {
-          pending: "⏳ Aguardando",
-          preparing: "🔥 Em Preparo",
-          done: "🛵 Saiu p/ Entrega",
-          delivered: "🎉 Entregue",
-        };
-        const DCLASS = {
-          pending: "st-pending",
-          preparing: "st-preparing",
-          done: "st-done",
-          delivered: "st-delivered",
-        };
-        const DNEXT = {
-          pending: "preparing",
-          preparing: "done",
-          done: "delivered",
-        };
-        const DNLABEL = {
-          pending: "▶ Iniciar",
-          preparing: "🛵 Saiu",
-          done: "🎉 Entregue",
-        };
+        const DLABELS = { pending: "⏳ Aguardando", preparing: "🔥 Em Preparo", done: "🛵 Saiu p/ Entrega", delivered: "🎉 Entregue" };
+        const DCLASS = { pending: "st-pending", preparing: "st-preparing", done: "st-done", delivered: "st-delivered" };
+        const DNEXT = { pending: "preparing", preparing: "done", done: "delivered" };
+        const DNLABEL = { pending: "▶ Iniciar", preparing: "🛵 Saiu", done: "🎉 Entregue" };
 
-        grid.innerHTML = deliveries
-          .map((d) => {
+        grid.innerHTML = deliveries.map((d) => {
             const next = DNEXT[d.status];
             const isDelivered = d.status === "delivered";
             const e = d.endereco || {};
-            const addrLine = [e.rua, e.numero, e.complemento, e.bairro]
-              .filter(Boolean)
-              .join(", ");
-            return `<div class="order-card ${isDelivered ? "is-delivered" : ""}" style="border-left:3px solid ${isDelivered ? "transparent" : "var(--blue)"}">
+            const addrLine = [e.rua, e.numero, e.complemento, e.bairro].filter(Boolean).join(", ");
+            
+            // Adicionado onclick="openOrderDetail"
+            return `<div class="order-card ${isDelivered ? "is-delivered" : ""}" style="border-left:3px solid ${isDelivered ? "transparent" : "var(--blue)"}" onclick="openOrderDetail('delivery', '${d.deliveryId}', null)">
       <div class="oc-head">
         <div>
           <div class="oc-mesa">🛵 Delivery</div>
@@ -2170,14 +1886,10 @@
         </div>
       </div>
       <div class="oc-items">
-        ${(d.itens || [])
-          .map(
-            (i) => `<div class="oc-row">
-          <div><span class="oc-row-name">${i.quantidade}x ${i.nome}</span>${i.observacao ? `<span style="display:block;font-size:10px;color:var(--acc2);font-style:italic">📝 ${i.observacao}</span>` : ""}</div>
+        ${(d.itens || []).map((i) => `<div class="oc-row">
+          <div><span class="oc-row-name">${i.quantidade}x ${i.nome}</span>${i.observacao ? `<span class="oc-row-obs">📝 ${i.observacao}</span>` : ""}</div>
           <div style="display:flex;gap:8px;align-items:center"><span class="oc-row-val">${fmt(i.preco * i.quantidade)}</span></div>
-        </div>`,
-          )
-          .join("")}
+        </div>`).join("")}
         <div class="oc-row" style="margin-top:4px;padding-top:4px;border-top:1px dashed var(--b)">
           <span style="font-size:11px;color:var(--muted)">📍 ${addrLine}</span>
         </div>
@@ -2191,12 +1903,11 @@
           <div style="font-size:10px;color:var(--muted)">Entrega: ${fmt(d.taxaEntrega)}</div>
         </div>
         <div class="oc-actions">
-          ${next ? `<button class="act${d.status === "preparing" ? " green" : ""}" onclick="setDeliveryStatus('${d.deliveryId}','${next}')">${DNLABEL[d.status]}</button>` : '<span style="font-size:11px;color:var(--muted)">Concluído</span>'}
+          ${next ? `<button class="act${d.status === "preparing" ? " green" : ""}" onclick="event.stopPropagation(); setDeliveryStatus('${d.deliveryId}','${next}')">${DNLABEL[d.status]}</button>` : '<span style="font-size:11px;color:var(--muted)">Concluído</span>'}
         </div>
       </div>
     </div>`;
-          })
-          .join("");
+          }).join("");
       }
 
       function setDeliveryStatus(deliveryId, status) {
@@ -2207,97 +1918,47 @@
         d.status = status;
         d.updatedAt = Date.now();
         db.notifications = db.notifications || [];
-        db.notifications.unshift({
-          type: "delivery:status",
-          deliveryId,
-          status,
-          id: Date.now(),
-          read: false,
-          ts: Date.now(),
-        });
-        writeDb(db);
-        refresh();
-        showToast(
-          `Delivery #${deliveryId.slice(-6).toUpperCase()} — ${status}`,
-        );
+        db.notifications.unshift({ type: "delivery:status", deliveryId, status, id: Date.now(), read: false, ts: Date.now() });
+        writeDb(db); refresh(); showToast(`Delivery #${deliveryId.slice(-6).toUpperCase()} — ${status}`);
       }
 
-      // ── Filters & Nav ───────────────────────────────────────────────────
       function filterMesa(m, btn) {
-        S.filterMesa = m;
-        document
-          .querySelectorAll('[onclick^="filterMesa"]')
-          .forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-        if (window.innerWidth <= 900) closeSidebar();
-        renderMesaCards();
-        renderOrders();
+        S.filterMesa = m; document.querySelectorAll('[onclick^="filterMesa"]').forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active"); if (window.innerWidth <= 900) closeSidebar(); renderMesaCards(); renderOrders();
       }
       function filterMesaCard(m) {
         S.filterMesa = S.filterMesa === m ? "all" : m;
-        document
-          .querySelectorAll('[onclick^="filterMesa"]')
-          .forEach((b) => b.classList.remove("active"));
-        const btn = document.querySelector(
-          `[onclick="filterMesa(${S.filterMesa === "all" ? `'all'` : S.filterMesa},this)"]`,
-        );
-        if (btn) btn.classList.add("active");
-        renderMesaCards();
-        renderOrders();
+        document.querySelectorAll('[onclick^="filterMesa"]').forEach((b) => b.classList.remove("active"));
+        const btn = document.querySelector(`[onclick="filterMesa(${S.filterMesa === "all" ? `'all'` : S.filterMesa},this)"]`);
+        if (btn) btn.classList.add("active"); renderMesaCards(); renderOrders();
       }
       function filterStatus(s, btn) {
-        S.filterStatus = s;
-        document
-          .querySelectorAll("#view-pedidos .fpill")
-          .forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-        renderOrders();
+        S.filterStatus = s; document.querySelectorAll("#view-pedidos .fpill").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active"); renderOrders();
       }
       function goView(v, btn) {
-        S.currentView = v;
-        document
-          .querySelectorAll(".view")
-          .forEach((el) => el.classList.remove("active"));
+        S.currentView = v; document.querySelectorAll(".view").forEach((el) => el.classList.remove("active"));
         document.getElementById(`view-${v}`).classList.add("active");
-        document
-          .querySelectorAll(".nav-btn")
-          .forEach((b) => b.classList.remove("active"));
-        if (btn) btn.classList.add("active");
-        if (window.innerWidth <= 900) closeSidebar();
-        refresh();
+        document.querySelectorAll(".nav-btn").forEach((b) => b.classList.remove("active"));
+        if (btn) btn.classList.add("active"); if (window.innerWidth <= 900) closeSidebar(); refresh();
       }
       function toggleSidebar() {
-        const sb = document.getElementById("sidebar");
-        const ov = document.getElementById("sb-overlay");
-        sb.classList.contains("open")
-          ? closeSidebar()
-          : (sb.classList.add("open"),
-            ov.classList.add("open"),
-            (document.body.style.overflow = "hidden"));
+        const sb = document.getElementById("sidebar"); const ov = document.getElementById("sb-overlay");
+        sb.classList.contains("open") ? closeSidebar() : (sb.classList.add("open"), ov.classList.add("open"), (document.body.style.overflow = "hidden"));
       }
       function closeSidebar() {
-        document.getElementById("sidebar").classList.remove("open");
-        document.getElementById("sb-overlay").classList.remove("open");
-        document.body.style.overflow = "";
+        document.getElementById("sidebar").classList.remove("open"); document.getElementById("sb-overlay").classList.remove("open"); document.body.style.overflow = "";
       }
 
       function refresh() {
         renderStats();
-        if (S.currentView === "pedidos") {
-          renderMesaCards();
-          renderOrders();
-        } else if (S.currentView === "mesas") {
-          renderSessions();
-        } else if (S.currentView === "relatorio") {
-          renderReport();
-        } else if (S.currentView === "cardapio") {
-          renderCardapio();
-        } else if (S.currentView === "delivery") {
-          renderDelivery();
-        }
+        if (S.currentView === "pedidos") { renderMesaCards(); renderOrders(); } 
+        else if (S.currentView === "mesas") { renderSessions(); } 
+        else if (S.currentView === "relatorio") { renderReport(); } 
+        else if (S.currentView === "cardapio") { renderCardapio(); } 
+        else if (S.currentView === "delivery") { renderDelivery(); }
       }
 
-      // ── Polling & Radar ───────────────────────────────────────────────
       const POLL_MS = 5000;
       let _pollStart = Date.now();
       let _lastOrderIds = new Set();
@@ -2305,120 +1966,55 @@
       let _lastWaiterTs = 0;
 
       function animatePollBar() {
-        const bar = document.getElementById("poll-prog");
-        bar.style.transition = "none";
-        bar.style.width = "0%";
-        requestAnimationFrame(() =>
-          requestAnimationFrame(() => {
-            bar.style.transition = `width ${POLL_MS}ms linear`;
-            bar.style.width = "100%";
-          }),
-        );
+        const bar = document.getElementById("poll-prog"); bar.style.transition = "none"; bar.style.width = "0%";
+        requestAnimationFrame(() => requestAnimationFrame(() => { bar.style.transition = `width ${POLL_MS}ms linear`; bar.style.width = "100%"; }));
       }
 
       function detectNewEvents() {
         const db = readDb();
-
-        // Radar Mesas
         const orders = getAllActiveOrders();
         const curIds = new Set(orders.map((o) => o.orderId));
         const newOnes = [...curIds].filter((id) => !_lastOrderIds.has(id));
-        if (newOnes.length > 0) {
-          newOnes.forEach(() => newOrderSound());
-          showToast(
-            `🆕 Novo pedido — Mesa ${orders.find((o) => newOnes.includes(o.orderId))?.mesa || ""}!`,
-          );
-        }
+        if (newOnes.length > 0) { newOnes.forEach(() => newOrderSound()); showToast(`🆕 Novo pedido — Mesa ${orders.find((o) => newOnes.includes(o.orderId))?.mesa || ""}!`); }
         _lastOrderIds = curIds;
 
-        // Radar Delivery
         const deliveries = db.deliveries || [];
         const curDelivIds = new Set(deliveries.map((d) => d.deliveryId));
-        const newDelivs = [...curDelivIds].filter(
-          (id) => !_lastDeliveryIds.has(id),
-        );
+        const newDelivs = [...curDelivIds].filter((id) => !_lastDeliveryIds.has(id));
         if (newDelivs.length > 0) {
           newDelivs.forEach(() => newOrderSound());
-          const delivInfo = deliveries.find((d) =>
-            newDelivs.includes(d.deliveryId),
-          );
-          showToast(
-            `🛵 Novo Delivery — ${delivInfo?.cliente?.nome || "Cliente"}!`,
-          );
+          const delivInfo = deliveries.find((d) => newDelivs.includes(d.deliveryId));
+          showToast(`🛵 Novo Delivery — ${delivInfo?.cliente?.nome || "Cliente"}!`);
         }
         _lastDeliveryIds = curDelivIds;
 
-        // Radar Garçom
-        const waiterSessions = (db.sessions || []).filter(
-          (s) => s.garcomChamado && s.status === "open",
-        );
-        const newWaiter = waiterSessions.some(
-          (s) => s.garcomTimestamp > _lastWaiterTs,
-        );
-        if (newWaiter && waiterSessions.length > 0) {
-          waiterSound();
-          _lastWaiterTs = waiterSessions.reduce(
-            (m, s) => Math.max(m, s.garcomTimestamp || 0),
-            0,
-          );
-        }
+        const waiterSessions = (db.sessions || []).filter((s) => s.garcomChamado && s.status === "open");
+        const newWaiter = waiterSessions.some((s) => s.garcomTimestamp > _lastWaiterTs);
+        if (newWaiter && waiterSessions.length > 0) { waiterSound(); _lastWaiterTs = waiterSessions.reduce((m, s) => Math.max(m, s.garcomTimestamp || 0), 0); }
       }
 
       function manualRefresh() {
         const icon = document.getElementById("ref-icon");
-        if (icon) {
-          icon.style.transition = "transform .5s";
-          icon.style.transform = "rotate(360deg)";
-          setTimeout(() => {
-            icon.style.transition = "none";
-            icon.style.transform = "";
-          }, 550);
-        }
-        refresh();
-        _pollStart = Date.now();
-        animatePollBar();
-        showToast("✓ Dados atualizados");
+        if (icon) { icon.style.transition = "transform .5s"; icon.style.transform = "rotate(360deg)"; setTimeout(() => { icon.style.transition = "none"; icon.style.transform = ""; }, 550); }
+        refresh(); _pollStart = Date.now(); animatePollBar(); showToast("✓ Dados atualizados");
       }
 
       function showToast(msg, type = "ok") {
-        const t = document.getElementById("toast");
-        t.innerHTML = msg;
-        // Reseta as classes
-        t.className = "toast";
-        // Aplica o tipo
-        if (type === "err") {
-          t.style.borderLeftColor = "var(--red)";
-        } else {
-          t.style.borderLeftColor = "var(--acc)";
-        }
-
-        t.classList.add("show");
-        clearTimeout(window._tt);
-        window._tt = setTimeout(() => t.classList.remove("show"), 3500);
+        const t = document.getElementById("toast"); t.innerHTML = msg; t.className = "toast";
+        if (type === "err") { t.style.borderLeftColor = "var(--red)"; } else { t.style.borderLeftColor = "var(--acc)"; }
+        t.classList.add("show"); clearTimeout(window._tt); window._tt = setTimeout(() => t.classList.remove("show"), 3500);
       }
-      function updateClock() {
-        const clk = document.getElementById("tb-clock");
-        if (clk) clk.textContent = new Date().toLocaleTimeString("pt-BR");
-      }
+      function updateClock() { const clk = document.getElementById("tb-clock"); if (clk) clk.textContent = new Date().toLocaleTimeString("pt-BR"); }
 
-      // ── Boot ──────────────────────────────────────────────────────
       const initialDb = readDb();
       _lastOrderIds = new Set(getAllActiveOrders().map((o) => o.orderId));
-      _lastDeliveryIds = new Set(
-        (initialDb.deliveries || []).map((d) => d.deliveryId),
-      );
+      _lastDeliveryIds = new Set((initialDb.deliveries || []).map((d) => d.deliveryId));
 
       renderLojaStatus();
       refresh();
       animatePollBar();
-      setInterval(() => {
-        detectNewEvents();
-        refresh();
-        _pollStart = Date.now();
-        animatePollBar();
-      }, POLL_MS);
-      setInterval(updateClock, 1000);
-      updateClock();
+      setInterval(() => { detectNewEvents(); refresh(); _pollStart = Date.now(); animatePollBar(); }, POLL_MS);
+      setInterval(updateClock, 1000); updateClock();
     </script>
   </body>
 </html>

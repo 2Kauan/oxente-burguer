@@ -28,47 +28,17 @@
       * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
       body { font-family: "DM Sans", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; transition: all 0.3s ease; }
 
-      /* ── ESTADO: LOJA FECHADA GLOBAL (KILL SWITCH) ── */
-      body.is-closed .products-list,
-      body.is-closed .cat-scroll,
-      body.is-closed .search-wrap {
-        opacity: 0.45;
-        pointer-events: none;
-        filter: grayscale(80%);
+      /* ── ESTADO: LOJA FECHADA GLOBAL ── */
+      body.is-closed .products-list, body.is-closed .cat-scroll, body.is-closed .search-wrap {
+        opacity: 0.45; pointer-events: none; filter: grayscale(80%);
       }
-      body.is-closed .cart-sticky-footer {
-        display: none !important;
-      }
-      .global-closed-banner {
-        display: none;
-        background: rgba(224, 82, 82, 0.1);
-        border: 1px solid rgba(224, 82, 82, 0.25);
-        margin: 14px 16px 0;
-        padding: 16px;
-        border-radius: var(--r);
-        text-align: center;
-        color: var(--red);
-      }
-      .global-closed-banner.show {
-        display: block;
-        animation: slideDown 0.3s ease;
-      }
-      @keyframes slideDown {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-      .global-closed-title {
-        font-family: "Fraunces", serif;
-        font-size: 18px;
-        font-weight: 900;
-        margin-bottom: 4px;
-      }
-      .global-closed-sub {
-        font-size: 13px;
-        font-weight: 500;
-        opacity: 0.9;
-        color: var(--muted);
-      }
+      body.is-closed .cart-sticky-footer { display: none !important; }
+      
+      .global-closed-banner { display: none; background: rgba(224, 82, 82, 0.1); border: 1px solid rgba(224, 82, 82, 0.25); margin: 14px 16px 0; padding: 16px; border-radius: var(--r); text-align: center; color: var(--red); }
+      .global-closed-banner.show { display: block; animation: slideDown 0.3s ease; }
+      @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+      .global-closed-title { font-family: "Fraunces", serif; font-size: 18px; font-weight: 900; margin-bottom: 4px; }
+      .global-closed-sub { font-size: 13px; font-weight: 500; opacity: 0.9; color: var(--muted); }
 
       .header { position: sticky; top: 0; z-index: 100; background: var(--bg); border-bottom: 1px solid var(--border); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
       .brand { font-family: "Fraunces", serif; font-size: 22px; font-weight: 900; color: var(--accent); }
@@ -105,8 +75,10 @@
       .cat-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
 
       .products-list { padding: 4px 16px; display: flex; flex-direction: column; gap: 10px; }
-      .product-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; display: flex; gap: 0; transition: border-color 0.2s; }
-      .product-card.unavailable { opacity: 0.45; pointer-events: none; }
+      .product-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; display: flex; gap: 0; transition: border-color 0.2s, background 0.2s; cursor: pointer; }
+      .product-card:active { background: var(--surface2); }
+      .product-card.unavailable { opacity: 0.45; pointer-events: none; filter: grayscale(50%); }
+      
       .product-img { width: 90px; height: 90px; object-fit: cover; flex-shrink: 0; background: var(--surface2); }
       .product-body { flex: 1; padding: 12px 14px 12px 12px; display: flex; flex-direction: column; justify-content: space-between; min-width: 0; }
       .product-top { margin-bottom: 4px; }
@@ -115,10 +87,11 @@
       .unavail-tag { font-size: 10px; color: var(--red); font-weight: 600; margin-top: 2px; }
       .product-bottom { display: flex; align-items: center; justify-content: space-between; }
       .product-price { font-family: "Fraunces", serif; font-size: 16px; font-weight: 700; color: var(--accent2); }
+      
       .add-btn { width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--accent); background: transparent; color: var(--accent); font-size: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; line-height: 1; }
-      .add-btn.in-cart { background: var(--accent); color: white; border-color: var(--accent); }
-      .add-btn:active { transform: scale(0.88); }
+      .add-btn:active { transform: scale(0.88); background: rgba(232, 82, 26, 0.1); }
 
+      /* ── CARRINHO E PEDIDOS ── */
       .cart-empty { display: flex; flex-direction: column; align-items: center; padding: 60px 24px; color: var(--muted); text-align: center; gap: 10px; }
       .cart-empty-icon { font-size: 52px; }
       .cart-empty-label { font-family: "Fraunces", serif; font-size: 22px; color: var(--dim); }
@@ -128,41 +101,30 @@
       .cart-item-body { flex: 1; min-width: 0; }
       .cart-item-name { font-weight: 600; font-size: 13px; margin-bottom: 2px; }
       .cart-item-price { font-size: 12px; color: var(--muted); }
-      .obs-input { width: 100%; margin-top: 6px; background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; padding: 7px 10px; color: var(--text); font-family: "DM Sans", sans-serif; font-size: 12px; outline: none; resize: none; transition: border-color 0.2s; }
-      .obs-input::placeholder { color: var(--muted); }
-      .obs-input:focus { border-color: var(--accent); }
+      .cart-item-obs-txt { font-size: 10px; color: var(--accent2); margin-top: 2px; line-height: 1.3; }
+      
       .cart-item-controls { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
       .qty-btn { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface2); color: var(--text); font-size: 15px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; }
       .qty-btn.del { border-color: var(--red); color: var(--red); }
       .qty-btn:active { transform: scale(0.88); }
       .qty-num { font-weight: 700; font-size: 15px; min-width: 22px; text-align: center; }
       
-      /* ── RODAPÉ FIXO DO CARRINHO (GLASSMORPHISM) ── */
-      .cart-sticky-footer {
-        position: sticky;
-        bottom: 0;
-        background: rgba(28, 26, 23, 0.92);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border-top: 1px solid var(--border);
-        padding: 14px 0 0;
-        z-index: 95;
-      }
+      .cart-sticky-footer { position: sticky; bottom: 0; background: rgba(28, 26, 23, 0.92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid var(--border); padding: 14px 0 0; z-index: 95; }
       .cart-summary { margin: 0 16px; background: transparent; padding: 0 4px 12px; }
       .summary-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
       .summary-total { display: flex; justify-content: space-between; font-weight: 700; font-size: 18px; align-items: center; }
       .summary-total span:last-child { font-family: "Fraunces", serif; color: var(--accent2); font-size: 22px; }
       
       .send-wrap { padding: 0 16px 16px; }
-      .send-btn { width: 100%; padding: 17px; background: var(--accent); color: white; border: none; border-radius: var(--r); font-family: "Fraunces", serif; font-size: 19px; font-weight: 900; cursor: pointer; transition: all 0.2s; letter-spacing: 0.5px; }
+      .send-btn { width: 100%; padding: 17px; background: var(--accent); color: white; border: none; border-radius: var(--r); font-family: "Fraunces", serif; font-size: 16px; font-weight: 900; cursor: pointer; transition: all 0.2s; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center; }
       .send-btn:disabled { background: var(--dim); color: var(--muted); cursor: not-allowed; }
       .send-btn:not(:disabled):active { transform: scale(0.98); background: #c4411a; }
 
       .eta-banner { margin: 14px 16px 0; background: rgba(242, 161, 52, 0.1); border: 1px solid rgba(242, 161, 52, 0.25); border-radius: var(--r); padding: 12px 14px; display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--accent2); }
-      .eta-banner strong { font-weight: 700; }
-
+      
       .orders-list { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
-      .order-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; animation: fadeUp 0.3s ease; }
+      .order-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; animation: fadeUp 0.3s ease; transition: all 0.3s ease; }
+      .order-card.is-done { opacity: 0.45; filter: grayscale(80%); }
       @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
       .order-head { display: flex; justify-content: space-between; align-items: center; padding: 11px 14px; background: var(--surface2); border-bottom: 1px solid var(--border); }
       .order-id-txt { font-size: 11px; color: var(--muted); }
@@ -173,22 +135,67 @@
       .order-body { padding: 11px 14px; }
       .order-item-row { display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; border-bottom: 1px solid var(--border); }
       .order-item-row:last-child { border-bottom: none; }
-      .order-item-obs { font-size: 10px; color: var(--muted); font-style: italic; margin-top: 1px; }
+      .order-item-obs { font-size: 10px; color: var(--muted); font-style: italic; margin-top: 1px; white-space: pre-line; }
       .order-foot { display: flex; justify-content: space-between; font-weight: 700; font-size: 14px; padding: 10px 14px; border-top: 1px solid var(--border); }
       .order-foot span:last-child { font-family: "Fraunces", serif; color: var(--accent2); }
-
-      .poll-bar { padding: 8px 16px; display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
-      .poll-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); animation: blink 2s infinite; }
-      @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
 
       .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(12px); background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r); padding: 11px 18px; font-size: 13px; font-weight: 600; opacity: 0; transition: all 0.3s; z-index: 999; white-space: nowrap; pointer-events: none; }
       .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
       .toast.ok { border-color: var(--green); color: var(--green); }
       .toast.err { border-color: var(--red); color: var(--red); }
 
+      /* ── SKELETON ── */
       .skel { background: linear-gradient( 90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75% ); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: var(--r); }
       @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
       .skel-card { height: 90px; margin: 0 16px 10px; }
+
+      /* ── MODAL CENTRAL (PRODUTO + EXTRAS) ── */
+      .prod-modal-overlay {
+        display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+        z-index: 9999; align-items: center; justify-content: center;
+        opacity: 0; transition: opacity 0.2s ease; padding: 20px;
+      }
+      .prod-modal-overlay.show { display: flex; opacity: 1; }
+      
+      .prod-modal-box {
+        background: var(--surface); width: 100%; max-width: 380px; border-radius: 20px;
+        overflow: hidden; transform: translateY(20px) scale(0.95);
+        transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        display: flex; flex-direction: column; max-height: 85vh; border: 1px solid var(--border);
+        position: relative;
+      }
+      .prod-modal-overlay.show .prod-modal-box { transform: translateY(0) scale(1); }
+      
+      .pm-close {
+        position: absolute; top: 12px; right: 12px; width: 32px; height: 32px;
+        background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%;
+        font-size: 16px; display: flex; align-items: center; justify-content: center;
+        cursor: pointer; backdrop-filter: blur(4px); z-index: 10;
+      }
+      
+      .pm-img { width: 100%; height: 180px; object-fit: cover; background: var(--surface2); flex-shrink: 0; }
+      .pm-body { padding: 20px; overflow-y: auto; flex: 1; }
+      
+      .pm-title { font-family: "Fraunces", serif; font-size: 22px; font-weight: 900; margin-bottom: 6px; color: var(--accent); line-height: 1.1; }
+      .pm-desc { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 20px; }
+      
+      .pm-section-title { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; display: block; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+      
+      .pm-extra-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+      .pm-extra-info { display: flex; flex-direction: column; }
+      .pm-extra-name { font-size: 14px; font-weight: 600; color: var(--text); }
+      .pm-extra-price { font-size: 12px; color: var(--accent2); font-weight: 600; }
+      
+      .pm-obs-input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text); font-family: "DM Sans", sans-serif; font-size: 13px; outline: none; resize: vertical; min-height: 60px; margin-bottom: 10px;}
+      .pm-obs-input:focus { border-color: var(--accent); }
+      .pm-obs-input::placeholder { color: var(--muted); }
+
+      .pm-footer { padding: 16px 20px; background: var(--surface2); border-top: 1px solid var(--border); display: flex; gap: 12px; align-items: center; }
+      .pm-qty-ctrl { display: flex; align-items: center; gap: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 4px; }
+      .pm-qty-ctrl button { width: 34px; height: 34px; background: transparent; border: none; color: var(--text); font-size: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+      .pm-qty-ctrl button:active { background: var(--surface); border-radius: 6px; }
+      .pm-qty-ctrl span { font-weight: 700; font-size: 16px; min-width: 20px; text-align: center; }
     </style>
   </head>
   <body>
@@ -204,9 +211,7 @@
       <header class="header">
         <div class="brand">🍔 BurgerHouse</div>
         <div class="mesa-tag">Mesa <b id="h-mesa">–</b></div>
-        <button class="waiter-btn" id="waiter-btn" onclick="callWaiter()" title="Chamar garçom">
-          🔔
-        </button>
+        <button class="waiter-btn" id="waiter-btn" onclick="callWaiter()" title="Chamar garçom">🔔</button>
       </header>
 
       <div id="closed-banner" class="closed-banner" style="display: none">
@@ -242,7 +247,6 @@
         <div class="products-list" id="products-list">
           <div class="skel skel-card"></div>
           <div class="skel skel-card"></div>
-          <div class="skel skel-card"></div>
         </div>
       </div>
 
@@ -252,11 +256,11 @@
         <div class="cart-sticky-footer" id="cart-footer" style="display: none;">
           <div class="cart-summary">
             <div class="summary-row"><span id="cart-count-txt">0 itens</span></div>
-            <div class="summary-total"><span>Total</span><span id="cart-total-txt">R$ 0,00</span></div>
           </div>
           <div class="send-wrap">
             <button class="send-btn" id="send-btn" onclick="sendOrder()">
-              ENVIAR PEDIDO
+              <span>Enviar Pedido</span>
+              <span id="cart-total-txt">R$ 0,00</span>
             </button>
           </div>
         </div>
@@ -271,11 +275,16 @@
       </div>
     </div>
 
+    <div class="prod-modal-overlay" id="prod-modal" onclick="closeProdModal(event)">
+      <div class="prod-modal-box" id="prod-modal-box">
+        </div>
+    </div>
+
     <div class="toast" id="toast"></div>
 
     <script>
       /* ═══════════════════════════════════════════════════════════════
-       CLIENT APP v2 - SALÃO COM SINCRONIZAÇÃO E KILL SWITCH (LOJA FECHADA)
+       CLIENT APP v2.1 - SALÃO COM MODAL CENTRAL E ADICIONAIS DINÂMICOS
       ═══════════════════════════════════════════════════════════════ */
 
       const DB_KEY = "burgerhouse_db_v2";
@@ -308,7 +317,7 @@
         { id: 2, nome: "Double Smash", preco: 38.9, categoria: "burger", descricao: "Dois blends 180g, duplo cheddar, bacon crocante", img: "https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=400&q=80", disponivel: true },
         { id: 3, nome: "Crispy Chicken", preco: 32.9, categoria: "burger", descricao: "Frango empanado crocante, maionese de mel, picles", img: "https://images.unsplash.com/photo-1606755962773-d324e0a13086?w=400&q=80", disponivel: true },
         { id: 4, nome: "Veggie Smash", preco: 29.9, categoria: "burger", descricao: "Blend de grão-de-bico, queijo vegano, rúcula", img: "https://images.unsplash.com/photo-1520072959219-c595dc870360?w=400&q=80", disponivel: true },
-        { id: 5, nome: "BBQ Bacon", preco: 36.9, categoria: "burger", descricao: "Blend 200g, cheddar defumado, onion rings, BBQ", img: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=400&q=80", disponivel: false },
+        { id: 5, nome: "BBQ Bacon", preco: 36.9, categoria: "burger", descricao: "Blend 200g, cheddar defumado, onion rings, molho BBQ", img: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=400&q=80", disponivel: false },
         { id: 6, nome: "Batata Frita P", preco: 12.9, categoria: "acomp", descricao: "Batata crocante com sal e ervas", img: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&q=80", disponivel: true },
         { id: 7, nome: "Batata Frita G", preco: 18.9, categoria: "acomp", descricao: "Porção grande para compartilhar", img: "https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?w=400&q=80", disponivel: true },
         { id: 8, nome: "Onion Rings", preco: 16.9, categoria: "acomp", descricao: "Anéis de cebola empanados crocantes", img: "https://images.unsplash.com/photo-1639024471283-03518883512d?w=400&q=80", disponivel: true },
@@ -316,6 +325,14 @@
         { id: 10, nome: "Milk Shake", preco: 19.9, categoria: "bebida", descricao: "Chocolate, Baunilha ou Morango — 400ml", img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=400&q=80", disponivel: true },
         { id: 11, nome: "Água Mineral", preco: 5.9, categoria: "bebida", descricao: "500ml com ou sem gás", img: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400&q=80", disponivel: true },
         { id: 12, nome: "Brownie", preco: 11.9, categoria: "sobremesa", descricao: "Brownie quente com sorvete de creme", img: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=400&q=80", disponivel: true },
+      ];
+
+      // Catálogo de Adicionais genéricos para os Burgers
+      const EXTRAS_CATALOG = [
+        { id: "ext_carne", nome: "+ Carne (180g)", preco: 8.0 },
+        { id: "ext_bacon", nome: "+ Bacon Crocante", preco: 4.0 },
+        { id: "ext_cheddar", nome: "+ Cheddar Cremoso", preco: 3.5 },
+        { id: "ext_cebola", nome: "+ Cebola Caramelizada", preco: 2.5 }
       ];
 
       function getProducts() {
@@ -328,6 +345,7 @@
       }
 
       let S = { mesa: null, token: null, sessionId: null, sessionStatus: "open", cart: [], currentCat: "all", currentTab: "menu" };
+      let M = { prodId: null, qty: 1, extras: {} }; // Estado temporário do Modal
 
       function fmt(v) { return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v); }
       function fmtTime(ts) { return new Date(ts).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }); }
@@ -343,7 +361,6 @@
 
       function getOrCreateSession() {
         let sess = getSession();
-        // Só cria nova se não existir NENHUMA sessão (aberta ou fechada)
         if (!sess) {
           const db = readDb();
           sess = { sessionId: `sess_${S.mesa}_${Date.now()}`, mesa: S.mesa, token: S.token, status: "open", orders: [], garcomChamado: false, createdAt: Date.now(), updatedAt: Date.now() };
@@ -381,7 +398,6 @@
           document.getElementById("closed-banner").style.display = "flex";
         }
         
-        // Verifica loja fechada global no boot
         const initialDb = readDb();
         _wasOpen = initialDb.lojaAberta !== false;
         renderLojaFechadaState(_wasOpen);
@@ -408,7 +424,6 @@
           const searchEl = document.getElementById("search");
           const q = (searchEl ? searchEl.value : "").toLowerCase();
           const list = document.getElementById("products-list");
-
           const prods = getProducts();
 
           let items = prods.filter((p) => {
@@ -424,24 +439,9 @@
             return;
           }
 
-          // LÓGICA: BOTÕES IFOOD-STYLE
+          // Clicar em qualquer lugar do card abre o Modal
           list.innerHTML = items.map((p) => {
-            const inCart = S.cart.find((c) => c.id === p.id);
-            
-            let btnHtml = "";
-            if (p.disponivel) {
-              if (inCart) {
-                btnHtml = `<div style="display:flex; align-items:center; gap:6px;">
-                  <button class="qty-btn del" onclick="updateQty(${p.id}, -1)">−</button>
-                  <span class="qty-num" style="font-size:14px; min-width:20px;">${inCart.quantidade}</span>
-                  <button class="qty-btn" onclick="updateQty(${p.id}, +1)" style="color: var(--accent); border-color: var(--accent);">+</button>
-                </div>`;
-              } else {
-                btnHtml = `<button class="add-btn" onclick="addCart(${p.id})">+</button>`;
-              }
-            }
-
-            return `<div class="product-card${p.disponivel ? "" : " unavailable"}">
+            return `<div class="product-card${p.disponivel ? "" : " unavailable"}" onclick="openProdModal(${p.id})">
               <img class="product-img" src="${p.img}" alt="${p.nome}" loading="lazy" onerror="this.style.background='var(--surface2)';this.src=''"/>
               <div class="product-body">
                 <div class="product-top">
@@ -451,7 +451,7 @@
                 </div>
                 <div class="product-bottom">
                   <div class="product-price">${fmt(p.preco)}</div>
-                  ${btnHtml}
+                  <button class="add-btn" onclick="event.stopPropagation(); openProdModal(${p.id})">+</button>
                 </div>
               </div>
             </div>`;
@@ -461,32 +461,160 @@
         }
       }
 
-      function addCart(id) {
-        if (readDb().lojaAberta === false) return showToast("Loja fechada. Pedidos suspensos.", "err");
-        if (S.sessionStatus === "closed") { showToast("Mesa encerrada", "err"); return; }
+      // ── FUNÇÕES DO MODAL DE PRODUTO & EXTRAS ──
+      function openProdModal(id) {
+        if (readDb().lojaAberta === false) return showToast("A loja está fechada.", "err");
+        if (S.sessionStatus === "closed") return showToast("Mesa encerrada.", "err");
         
         const prods = getProducts();
-        const p = prods.find((x) => x.id === id);
-        
+        const p = prods.find(x => x.id === id);
         if (!p || !p.disponivel) return;
-        const ex = S.cart.find((c) => c.id === id);
-        if (ex) ex.quantidade++; else S.cart.push({ ...p, quantidade: 1, observacao: "" });
-        saveCart(); renderMenu(); renderCart(); updateBadge(); showToast(`${p.nome} adicionado`, "ok");
+
+        // Reinicia o estado do modal
+        M = { prodId: id, qty: 1, extras: {} };
+
+        let extrasHtml = "";
+        if (p.categoria === "burger") {
+           extrasHtml = `<div class="pm-section-title">Adicionais</div>` + EXTRAS_CATALOG.map(ext => `
+             <div class="pm-extra-row">
+               <div class="pm-extra-info">
+                 <span class="pm-extra-name">${ext.nome}</span>
+                 <span class="pm-extra-price">+ ${fmt(ext.preco)}</span>
+               </div>
+               <div class="pm-qty-ctrl" style="padding: 2px; border:none; background:transparent;">
+                 <button style="border: 1px solid var(--border); border-radius:50%; width:28px; height:28px; font-size:14px;" onclick="changeModalExtra('${ext.id}', -1)">−</button>
+                 <span id="ext-qty-${ext.id}" style="font-size:14px; min-width:24px;">0</span>
+                 <button style="border: 1px solid var(--border); border-radius:50%; width:28px; height:28px; font-size:14px; color:var(--accent); border-color:var(--accent);" onclick="changeModalExtra('${ext.id}', 1)">+</button>
+               </div>
+             </div>
+           `).join("");
+        }
+
+        const box = document.getElementById("prod-modal-box");
+        box.innerHTML = `
+          <button class="pm-close" onclick="closeProdModal(event, true)">✕</button>
+          <img class="pm-img" src="${p.img}" alt="${p.nome}" onerror="this.style.display='none'" />
+          
+          <div class="pm-body">
+            <div class="pm-title">${p.nome}</div>
+            <div class="pm-desc">${p.descricao || ""}</div>
+            
+            ${extrasHtml}
+            
+            <div class="pm-section-title" style="margin-top:20px;">Observação</div>
+            <textarea class="pm-obs-input" id="pm-obs" placeholder="Ex: Tirar cebola, maionese à parte..."></textarea>
+          </div>
+          
+          <div class="pm-footer">
+             <div class="pm-qty-ctrl">
+               <button onclick="changeModalQty(-1)">−</button>
+               <span id="pm-qty-val">1</span>
+               <button onclick="changeModalQty(1)" style="color:var(--accent);">+</button>
+             </div>
+             <button class="send-btn" style="padding: 14px; font-size:16px; flex:1; display:flex; justify-content:space-between;" onclick="addCartFromModal()">
+               <span>Adicionar</span>
+               <span id="pm-total-btn">${fmt(p.preco)}</span>
+             </button>
+          </div>
+        `;
+        
+        const overlay = document.getElementById("prod-modal");
+        overlay.style.display = "flex";
+        setTimeout(() => overlay.classList.add("show"), 10);
       }
 
-      function updateQty(id, delta) {
+      function closeProdModal(e, force = false) {
+        if (force || e.target.id === "prod-modal") {
+          const overlay = document.getElementById("prod-modal");
+          overlay.classList.remove("show");
+          setTimeout(() => { overlay.style.display = "none"; }, 300);
+        }
+      }
+
+      function changeModalExtra(extId, delta) {
+        let atual = M.extras[extId] || 0;
+        let novo = atual + delta;
+        if (novo < 0) novo = 0;
+        if (novo > 5) novo = 5; // Limite de sanidade
+        
+        M.extras[extId] = novo;
+        document.getElementById(`ext-qty-${extId}`).textContent = novo;
+        updateModalTotal();
+      }
+
+      function changeModalQty(delta) {
+        let nova = M.qty + delta;
+        if (nova < 1) nova = 1;
+        M.qty = nova;
+        document.getElementById("pm-qty-val").textContent = nova;
+        updateModalTotal();
+      }
+
+      function updateModalTotal() {
+        const p = getProducts().find(x => x.id === M.prodId);
+        if(!p) return;
+
+        let extrasTotal = 0;
+        EXTRAS_CATALOG.forEach(ext => {
+           const q = M.extras[ext.id] || 0;
+           extrasTotal += (q * ext.preco);
+        });
+
+        const finalPrice = (p.preco + extrasTotal) * M.qty;
+        document.getElementById("pm-total-btn").textContent = fmt(finalPrice);
+      }
+
+      function addCartFromModal() {
+        const p = getProducts().find(x => x.id === M.prodId);
+        if(!p) return;
+
+        let extrasTotal = 0;
+        let extrasNomes = [];
+
+        EXTRAS_CATALOG.forEach(ext => {
+           const q = M.extras[ext.id] || 0;
+           if (q > 0) {
+              extrasTotal += (q * ext.preco);
+              extrasNomes.push(`${q}x ${ext.nome}`);
+           }
+        });
+
+        let finalPreco = p.preco + extrasTotal;
+        let baseObs = document.getElementById("pm-obs").value.trim();
+        
+        // A MÁGICA PARA O ADMIN LER: Injetamos os adicionais dentro do texto da observação
+        let obsUnificada = "";
+        if (extrasNomes.length > 0) {
+            obsUnificada += `[Com: ${extrasNomes.join(", ")}]`;
+        }
+        if (baseObs) {
+            obsUnificada += obsUnificada ? `\nObs: ${baseObs}` : `Obs: ${baseObs}`;
+        }
+
+        // O item do carrinho recebe um ID ÚNICO (cartItemId) para permitir comprar o mesmo burger com adicionais diferentes
+        S.cart.push({
+            cartItemId: Date.now() + Math.random(),
+            id: p.id,
+            nome: p.nome,
+            preco: finalPreco, 
+            quantidade: M.qty,
+            observacao: obsUnificada,
+            img: p.img
+        });
+
+        saveCart(); renderMenu(); renderCart(); updateBadge();
+        closeProdModal(null, true);
+        showToast(`${p.nome} adicionado`, "ok");
+      }
+
+      // ── FUNÇÕES DO CARRINHO (Atualizadas para usar cartItemId) ──
+      function updateQty(cartItemId, delta) {
         if (readDb().lojaAberta === false && delta > 0) return showToast("Loja fechada.", "err");
-        const idx = S.cart.findIndex((c) => c.id === id);
+        const idx = S.cart.findIndex((c) => c.cartItemId === cartItemId);
         if (idx === -1) return;
         S.cart[idx].quantidade += delta;
         if (S.cart[idx].quantidade <= 0) S.cart.splice(idx, 1);
-        saveCart(); renderMenu(); renderCart(); updateBadge();
-      }
-
-      function updateObs(id, val) {
-        const item = S.cart.find((c) => c.id === id);
-        if (item) item.observacao = val;
-        saveCart();
+        saveCart(); renderCart(); updateBadge();
       }
 
       function renderCart() {
@@ -514,11 +642,11 @@
           <div class="cart-item-body">
             <div class="cart-item-name">${item.nome}</div>
             <div class="cart-item-price">${fmt(item.preco)} cada</div>
-            <textarea class="obs-input" rows="1" placeholder="Observação (ex: sem cebola)" oninput="updateObs(${item.id},this.value)">${item.observacao || ""}</textarea>
+            ${item.observacao ? `<div class="cart-item-obs-txt">${item.observacao}</div>` : ""}
             <div class="cart-item-controls">
-              <button class="qty-btn del" onclick="updateQty(${item.id},-1)">−</button>
+              <button class="qty-btn del" onclick="updateQty(${item.cartItemId}, -1)">−</button>
               <span class="qty-num">${item.quantidade}</span>
-              <button class="qty-btn" onclick="updateQty(${item.id},+1)">+</button>
+              <button class="qty-btn" onclick="updateQty(${item.cartItemId}, +1)">+</button>
               <span style="font-size:12px;color:var(--muted);margin-left:4px">${fmt(item.preco * item.quantidade)}</span>
             </div>
           </div>
@@ -530,23 +658,19 @@
       }
 
       async function sendOrder() {
-        if (readDb().lojaAberta === false) {
-           showToast("A loja fechou! Pedido cancelado.", "err");
-           goTab("menu");
-           return;
-        }
+        if (readDb().lojaAberta === false) { showToast("A loja fechou! Pedido cancelado.", "err"); goTab("menu"); return; }
         if (S.cart.length === 0) return showToast("Carrinho vazio", "err");
         if (S.sessionStatus === "closed") return showToast("Mesa encerrada", "err");
         
         const btn = document.getElementById("send-btn");
-        btn.textContent = "ENVIANDO…"; btn.disabled = true;
+        btn.innerHTML = "<span>Enviando...</span>"; btn.disabled = true;
         await new Promise((r) => setTimeout(r, 500));
 
         const db = readDb();
         const sess = db.sessions.find((s) => s.sessionId === S.sessionId);
         if (!sess) {
           showToast("Sessão não encontrada", "err");
-          btn.textContent = "ENVIAR PEDIDO"; btn.disabled = false; return;
+          btn.innerHTML = `<span>Enviar Pedido</span><span id="cart-total-txt">${fmt(cartTotal())}</span>`; btn.disabled = false; return;
         }
 
         const hasBurger = S.cart.some((i) => { const p = PRODUCTS.find((p) => p.id === i.id); return p && p.categoria === "burger"; });
@@ -554,6 +678,7 @@
 
         const order = {
           orderId: `ord_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+          // Aqui o admin recebe exatamente a assinatura que ele espera, mas com o preço corrigido e a observação formatada!
           itens: S.cart.map((i) => ({ id: i.id, nome: i.nome, quantidade: i.quantidade, preco: i.preco, observacao: i.observacao || "" })),
           status: "pending", createdAt: Date.now(), updatedAt: Date.now(), tempoEstimado: eta,
         };
@@ -562,7 +687,7 @@
         broadcast({ type: "order:new", sessionId: S.sessionId, mesa: S.mesa, orderId: order.orderId });
 
         S.cart = []; saveCart();
-        btn.textContent = "ENVIAR PEDIDO"; btn.disabled = false;
+        btn.innerHTML = `<span>Enviar Pedido</span><span id="cart-total-txt">R$ 0,00</span>`; btn.disabled = false;
         renderMenu(); renderCart(); updateBadge(); renderOrders(); goTab("orders");
 
         const ob = document.getElementById("orders-body");
@@ -590,16 +715,19 @@
           return;
         }
         const sorted = [...sess.orders].sort((a, b) => b.createdAt - a.createdAt);
+        
         body.innerHTML = `<div class="orders-list">${sorted.map((o) => {
             const total = o.itens.reduce((s, i) => s + i.preco * i.quantidade, 0);
-            return `<div class="order-card">
+            const isDone = o.status === "done";
+            
+            return `<div class="order-card ${isDone ? 'is-done' : ''}">
       <div class="order-head">
         <span class="order-id-txt">#${o.orderId.slice(-6).toUpperCase()} · ${fmtTime(o.createdAt)}</span>
         <span class="status-pill ${STATUS_CLASS[o.status] || ""}">${STATUS_LABEL[o.status] || o.status}</span>
       </div>
       <div class="order-body">
         ${o.itens.map((i) => `<div class="order-item-row">
-          <div><span style="font-weight:600">${i.quantidade}× ${i.nome}</span>${i.observacao ? `<div class="order-item-obs">📝 ${i.observacao}</div>` : ""}</div>
+          <div><span style="font-weight:600">${i.quantidade}× ${i.nome}</span>${i.observacao ? `<div class="order-item-obs">${i.observacao}</div>` : ""}</div>
           <span>${fmt(i.preco * i.quantidade)}</span>
         </div>`).join("")}
       </div>
@@ -711,14 +839,14 @@
         setInterval(() => {
           const db = readDb();
 
-          // 1. Radar do Status Global da Loja (Kill Switch)
+          // 1. Radar do Status Global da Loja
           const isNowOpen = db.lojaAberta !== false;
           if (isNowOpen !== _wasOpen) {
             _wasOpen = isNowOpen;
             renderLojaFechadaState(isNowOpen);
           }
 
-          // 2. Checa se o Admin bloqueou ou liberou a MESA
+          // 2. Checa se o Admin bloqueou a MESA
           checkSessionStatus();
 
           // 3. Radar do Cardápio Inteligente
