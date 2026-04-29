@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <style>
       /* ═══════════════════════════════════════════════
-       DESIGN — Cliente Mobile
+       DESIGN — Cliente Mobile (UX Premium)
     ═══════════════════════════════════════════════ */
       :root {
         --bg: #1c1a17;
@@ -69,12 +69,14 @@
       .search-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px 10px 38px; color: var(--text); font-family: "DM Sans", sans-serif; font-size: 14px; outline: none; transition: border-color 0.2s; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2380756c' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398l3.85 3.85a1 1 0 0 0 1.415-1.415l-3.868-3.833zm-5.242 1.656a5 5 0 1 1 0-10 5 5 0 0 1 0 10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: 12px 50%; }
       .search-input::placeholder { color: var(--muted); }
       .search-input:focus { border-color: var(--accent); }
-      .cat-scroll { display: flex; gap: 7px; padding: 10px 16px; overflow-x: auto; scrollbar-width: none; }
+      
+      /* MELHORIA UX: Barra de categorias FIXA */
+      .cat-scroll { display: flex; gap: 7px; padding: 10px 16px; overflow-x: auto; scrollbar-width: none; position: sticky; top: 104px; z-index: 85; background: var(--bg); border-bottom: 1px solid var(--border); }
       .cat-scroll::-webkit-scrollbar { display: none; }
       .cat-btn { flex-shrink: 0; padding: 6px 14px; border-radius: 99px; border: 1px solid var(--border); background: var(--surface2); color: var(--muted); font-family: "DM Sans", sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; letter-spacing: 0.3px; }
       .cat-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
 
-      .products-list { padding: 4px 16px; display: flex; flex-direction: column; gap: 10px; }
+      .products-list { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
       .product-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; display: flex; gap: 0; transition: border-color 0.2s, background 0.2s; cursor: pointer; }
       .product-card:active { background: var(--surface2); }
       .product-card.unavailable { opacity: 0.45; pointer-events: none; filter: grayscale(50%); }
@@ -109,6 +111,7 @@
       .qty-btn:active { transform: scale(0.88); }
       .qty-num { font-weight: 700; font-size: 15px; min-width: 22px; text-align: center; }
       
+      /* MELHORIA UX: Rodapé Fixo do Carrinho (Glassmorphism) */
       .cart-sticky-footer { position: sticky; bottom: 0; background: rgba(28, 26, 23, 0.92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid var(--border); padding: 14px 0 0; z-index: 95; }
       .cart-summary { margin: 0 16px; background: transparent; padding: 0 4px 12px; }
       .summary-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
@@ -312,19 +315,11 @@
       const TABLE_TOKENS = { 1: "tok_mesa1_abc123", 2: "tok_mesa2_def456", 3: "tok_mesa3_ghi789", 4: "tok_mesa4_jkl012" };
       const VALID_TABLES = [1, 2, 3, 4];
 
-      const PRODUCTS = [
+      // Esse array genérico agora só é usado na hora de inicializar ou se houver erro grave.
+      // O sistema vai ler sempre os produtos direto do `readDb().products` para estar sempre atualizado com o Admin!
+      const DEFAULT_PRODUCTS = [
         { id: 1, nome: "Smash Clássico", preco: 28.9, categoria: "burger", descricao: "Blend 180g, queijo cheddar, alface, tomate", img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80", disponivel: true },
         { id: 2, nome: "Double Smash", preco: 38.9, categoria: "burger", descricao: "Dois blends 180g, duplo cheddar, bacon crocante", img: "https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=400&q=80", disponivel: true },
-        { id: 3, nome: "Crispy Chicken", preco: 32.9, categoria: "burger", descricao: "Frango empanado crocante, maionese de mel, picles", img: "https://images.unsplash.com/photo-1606755962773-d324e0a13086?w=400&q=80", disponivel: true },
-        { id: 4, nome: "Veggie Smash", preco: 29.9, categoria: "burger", descricao: "Blend de grão-de-bico, queijo vegano, rúcula", img: "https://images.unsplash.com/photo-1520072959219-c595dc870360?w=400&q=80", disponivel: true },
-        { id: 5, nome: "BBQ Bacon", preco: 36.9, categoria: "burger", descricao: "Blend 200g, cheddar defumado, onion rings, molho BBQ", img: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=400&q=80", disponivel: false },
-        { id: 6, nome: "Batata Frita P", preco: 12.9, categoria: "acomp", descricao: "Batata crocante com sal e ervas", img: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&q=80", disponivel: true },
-        { id: 7, nome: "Batata Frita G", preco: 18.9, categoria: "acomp", descricao: "Porção grande para compartilhar", img: "https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?w=400&q=80", disponivel: true },
-        { id: 8, nome: "Onion Rings", preco: 16.9, categoria: "acomp", descricao: "Anéis de cebola empanados crocantes", img: "https://images.unsplash.com/photo-1639024471283-03518883512d?w=400&q=80", disponivel: true },
-        { id: 9, nome: "Refrigerante", preco: 7.9, categoria: "bebida", descricao: "Coca-Cola, Guaraná ou Sprite — lata 350ml", img: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&q=80", disponivel: true },
-        { id: 10, nome: "Milk Shake", preco: 19.9, categoria: "bebida", descricao: "Chocolate, Baunilha ou Morango — 400ml", img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=400&q=80", disponivel: true },
-        { id: 11, nome: "Água Mineral", preco: 5.9, categoria: "bebida", descricao: "500ml com ou sem gás", img: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400&q=80", disponivel: true },
-        { id: 12, nome: "Brownie", preco: 11.9, categoria: "sobremesa", descricao: "Brownie quente com sorvete de creme", img: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=400&q=80", disponivel: true },
       ];
 
       // Catálogo de Adicionais genéricos para os Burgers
@@ -335,13 +330,10 @@
         { id: "ext_cebola", nome: "+ Cebola Caramelizada", preco: 2.5 }
       ];
 
+      // Essa função pega os produtos direto do banco (já com as edições/adições feitas no Admin)
       function getProducts() {
         const db = readDb();
-        const dbProds = db.products || [];
-        return PRODUCTS.map((p) => {
-          const dbP = dbProds.find((d) => d.id === p.id);
-          return dbP ? { ...p, disponivel: dbP.disponivel } : p;
-        });
+        return db.products || [];
       }
 
       let S = { mesa: null, token: null, sessionId: null, sessionStatus: "open", cart: [], currentCat: "all", currentTab: "menu" };
@@ -439,7 +431,7 @@
             return;
           }
 
-          // Clicar em qualquer lugar do card abre o Modal
+          // Clicar no card abre o Modal detalhado
           list.innerHTML = items.map((p) => {
             return `<div class="product-card${p.disponivel ? "" : " unavailable"}" onclick="openProdModal(${p.id})">
               <img class="product-img" src="${p.img}" alt="${p.nome}" loading="lazy" onerror="this.style.background='var(--surface2)';this.src=''"/>
@@ -470,7 +462,6 @@
         const p = prods.find(x => x.id === id);
         if (!p || !p.disponivel) return;
 
-        // Reinicia o estado do modal
         M = { prodId: id, qty: 1, extras: {} };
 
         let extrasHtml = "";
@@ -535,7 +526,7 @@
         let atual = M.extras[extId] || 0;
         let novo = atual + delta;
         if (novo < 0) novo = 0;
-        if (novo > 5) novo = 5; // Limite de sanidade
+        if (novo > 5) novo = 5;
         
         M.extras[extId] = novo;
         document.getElementById(`ext-qty-${extId}`).textContent = novo;
@@ -582,16 +573,10 @@
         let finalPreco = p.preco + extrasTotal;
         let baseObs = document.getElementById("pm-obs").value.trim();
         
-        // A MÁGICA PARA O ADMIN LER: Injetamos os adicionais dentro do texto da observação
         let obsUnificada = "";
-        if (extrasNomes.length > 0) {
-            obsUnificada += `[Com: ${extrasNomes.join(", ")}]`;
-        }
-        if (baseObs) {
-            obsUnificada += obsUnificada ? `\nObs: ${baseObs}` : `Obs: ${baseObs}`;
-        }
+        if (extrasNomes.length > 0) { obsUnificada += `[Com: ${extrasNomes.join(", ")}]`; }
+        if (baseObs) { obsUnificada += obsUnificada ? `\nObs: ${baseObs}` : `Obs: ${baseObs}`; }
 
-        // O item do carrinho recebe um ID ÚNICO (cartItemId) para permitir comprar o mesmo burger com adicionais diferentes
         S.cart.push({
             cartItemId: Date.now() + Math.random(),
             id: p.id,
@@ -607,7 +592,7 @@
         showToast(`${p.nome} adicionado`, "ok");
       }
 
-      // ── FUNÇÕES DO CARRINHO (Atualizadas para usar cartItemId) ──
+      // ── FUNÇÕES DO CARRINHO (Usam cartItemId para permitir itens iguais com obs diferentes) ──
       function updateQty(cartItemId, delta) {
         if (readDb().lojaAberta === false && delta > 0) return showToast("Loja fechada.", "err");
         const idx = S.cart.findIndex((c) => c.cartItemId === cartItemId);
@@ -615,6 +600,12 @@
         S.cart[idx].quantidade += delta;
         if (S.cart[idx].quantidade <= 0) S.cart.splice(idx, 1);
         saveCart(); renderCart(); updateBadge();
+      }
+
+      function updateObs(cartItemId, val) {
+        const item = S.cart.find((c) => c.cartItemId === cartItemId);
+        if (item) item.observacao = val;
+        saveCart();
       }
 
       function renderCart() {
@@ -673,12 +664,12 @@
           btn.innerHTML = `<span>Enviar Pedido</span><span id="cart-total-txt">${fmt(cartTotal())}</span>`; btn.disabled = false; return;
         }
 
-        const hasBurger = S.cart.some((i) => { const p = PRODUCTS.find((p) => p.id === i.id); return p && p.categoria === "burger"; });
+        const prods = getProducts();
+        const hasBurger = S.cart.some((i) => { const p = prods.find((p) => p.id === i.id); return p && p.categoria === "burger"; });
         const eta = hasBurger ? "15–20 min" : "8–12 min";
 
         const order = {
           orderId: `ord_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-          // Aqui o admin recebe exatamente a assinatura que ele espera, mas com o preço corrigido e a observação formatada!
           itens: S.cart.map((i) => ({ id: i.id, nome: i.nome, quantidade: i.quantidade, preco: i.preco, observacao: i.observacao || "" })),
           status: "pending", createdAt: Date.now(), updatedAt: Date.now(), tempoEstimado: eta,
         };

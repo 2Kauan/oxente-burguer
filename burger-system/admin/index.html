@@ -136,13 +136,8 @@
       }
 
       @keyframes pulse {
-        0%,
-        100% {
-          opacity: 1;
-        }
-        50% {
-          opacity: 0.3;
-        }
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.3; }
       }
       .tb-clock {
         font-family: var(--mono);
@@ -167,13 +162,8 @@
         display: flex;
       }
       @keyframes alertPulse {
-        0%,
-        100% {
-          opacity: 1;
-        }
-        50% {
-          opacity: 0.6;
-        }
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
       }
 
       /* ── Sidebar ── */
@@ -257,12 +247,11 @@
       }
       .stat-mini-val {
         font-family: var(--display);
-        font-size: 21px;
+        font-size: 19px;
         font-weight: 800;
         color: var(--text);
         line-height: 1.2;
-        overflow-wrap: break-word;
-        word-break: break-word;
+        white-space: nowrap;
       }
       .stat-mini-val.acc {
         color: var(--acc);
@@ -498,7 +487,7 @@
         overflow: hidden;
         transition: border-color 0.2s, opacity 0.3s, filter 0.3s;
         animation: slideUp 0.3s ease;
-        cursor: pointer; /* Feedback visual ao clicar */
+        cursor: pointer;
       }
       @keyframes slideUp {
         from { opacity: 0; transform: translateY(8px); }
@@ -599,7 +588,6 @@
         color: var(--acc2);
         font-style: italic;
         margin-top: 1px;
-        /* TRUNCATE no grid principal */
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -811,8 +799,8 @@
         gap: 0;
       }
       .prod-thumb {
-        width: 72px;
-        height: 72px;
+        width: 80px;
+        height: 100%;
         object-fit: cover;
         flex-shrink: 0;
       }
@@ -854,6 +842,16 @@
         border-color: rgba(224, 82, 82, 0.3);
         color: var(--red);
       }
+      
+      /* Inputs para Modal de Produtos */
+      .field { margin-bottom: 14px; text-align: left; }
+      .field-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: block; }
+      .field-row { display: grid; gap: 10px; }
+      .field-row.col2 { grid-template-columns: 1fr 1fr; }
+      .inp { width: 100%; background: var(--s2); border: 1px solid var(--b); border-radius: 6px; padding: 10px 12px; color: var(--text); font-family: var(--sans); font-size: 13px; outline: none; transition: border-color 0.2s; }
+      .inp:focus { border-color: var(--acc); }
+      .inp::placeholder { color: var(--muted); }
+      select.inp { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%236b6b78%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 12px top 50%; background-size: 10px auto; padding-right: 30px; }
 
       /* ── Custom Modal Geral ── */
       .custom-modal-overlay {
@@ -1257,10 +1255,13 @@
 
         <div class="view" id="view-cardapio">
           <div class="page-hd">
-            <div class="page-title">CARDÁPIO</div>
-            <small style="color: var(--muted); font-size: 12px"
-              >Clique para ativar/desativar</small
-            >
+            <div>
+              <div class="page-title">CARDÁPIO</div>
+              <small style="color: var(--muted); font-size: 12px">Gerencie os produtos do app dos clientes</small>
+            </div>
+            <button class="close-sess-btn" onclick="openProductModal()" style="background: var(--green); color: #000; padding: 10px 16px; font-size: 13px;">
+              + NOVO PRODUTO
+            </button>
           </div>
           <div class="prod-grid" id="prod-grid"></div>
         </div>
@@ -1290,11 +1291,57 @@
          </div>
     </div>
 
+    <div class="custom-modal-overlay" id="product-modal">
+      <div class="custom-modal-box" style="text-align:left; max-width:420px;">
+        <div class="dm-header" style="background:transparent; border:none; padding:0 0 16px;">
+           <div class="cm-title" style="font-size:20px; color:white;">🍔 Novo Produto</div>
+           <p class="cm-text" style="margin-bottom:0;">Preencha os dados do item.</p>
+        </div>
+        
+        <div class="field">
+          <label class="field-label">Nome do Produto *</label>
+          <input class="inp" id="p-nome" placeholder="Ex: X-Bacon Supremo">
+        </div>
+        
+        <div class="field-row col2">
+            <div class="field">
+              <label class="field-label">Preço (R$) *</label>
+              <input class="inp" id="p-preco" type="number" step="0.01" placeholder="Ex: 25.90">
+            </div>
+            <div class="field">
+              <label class="field-label">Categoria</label>
+              <select class="inp" id="p-cat">
+                <option value="burger">🍔 Burgers</option>
+                <option value="acomp">🍟 Acompanhamentos</option>
+                <option value="bebida">🥤 Bebidas</option>
+                <option value="sobremesa">🍫 Sobremesas</option>
+              </select>
+            </div>
+        </div>
+        
+        <div class="field">
+          <label class="field-label">Descrição</label>
+          <textarea class="inp" id="p-desc" rows="2" placeholder="Ingredientes e detalhes (opcional)..."></textarea>
+        </div>
+        
+        <div class="field">
+          <label class="field-label">Link da Imagem (URL)</label>
+          <input class="inp" id="p-img" placeholder="https://exemplo.com/foto.jpg">
+          <div class="inp-hint">Se deixar vazio, usaremos uma foto genérica.</div>
+        </div>
+        
+        <div class="cm-actions" style="margin-top:24px;">
+          <button class="cm-btn cancel" onclick="closeProductModal()">Cancelar</button>
+          <button class="cm-btn confirm green" onclick="saveProduct()">💾 Salvar Produto</button>
+        </div>
+      </div>
+    </div>
+
     <div class="toast" id="toast"></div>
 
     <script>
       /* ═══════════════════════════════════════════════════════════════
-   ADMIN PANEL v2.3 - COM MODAL DE DETALHES DO PEDIDO
+   ADMIN PANEL v2.4 - COM CADASTRO E EXCLUSÃO DE PRODUTOS
 ═══════════════════════════════════════════════════════════════ */
 
       const DB_KEY = "burgerhouse_db_v2";
@@ -1339,18 +1386,18 @@
       }
 
       const DEFAULT_PRODUCTS = [
-        { id: 1, nome: "Smash Clássico", preco: 28.9, categoria: "burger", img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&q=75", disponivel: true },
-        { id: 2, nome: "Double Smash", preco: 38.9, categoria: "burger", img: "https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=200&q=75", disponivel: true },
-        { id: 3, nome: "Crispy Chicken", preco: 32.9, categoria: "burger", img: "https://images.unsplash.com/photo-1606755962773-d324e0a13086?w=200&q=75", disponivel: true },
-        { id: 4, nome: "Veggie Smash", preco: 29.9, categoria: "burger", img: "https://images.unsplash.com/photo-1520072959219-c595dc870360?w=200&q=75", disponivel: true },
-        { id: 5, nome: "BBQ Bacon", preco: 36.9, categoria: "burger", img: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=200&q=75", disponivel: false },
-        { id: 6, nome: "Batata Frita P", preco: 12.9, categoria: "acomp", img: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=200&q=75", disponivel: true },
-        { id: 7, nome: "Batata Frita G", preco: 18.9, categoria: "acomp", img: "https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?w=200&q=75", disponivel: true },
-        { id: 8, nome: "Onion Rings", preco: 16.9, categoria: "acomp", img: "https://images.unsplash.com/photo-1639024471283-03518883512d?w=200&q=75", disponivel: true },
-        { id: 9, nome: "Refrigerante", preco: 7.9, categoria: "bebida", img: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=200&q=75", disponivel: true },
-        { id: 10, nome: "Milk Shake", preco: 19.9, categoria: "bebida", img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=200&q=75", disponivel: true },
-        { id: 11, nome: "Água Mineral", preco: 5.9, categoria: "bebida", img: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=200&q=75", disponivel: true },
-        { id: 12, nome: "Brownie", preco: 11.9, categoria: "sobremesa", img: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=200&q=75", disponivel: true },
+        { id: 1, nome: "Smash Clássico", preco: 28.9, categoria: "burger", descricao: "Blend 180g, queijo cheddar, alface, tomate", img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&q=75", disponivel: true },
+        { id: 2, nome: "Double Smash", preco: 38.9, categoria: "burger", descricao: "Dois blends 180g, duplo cheddar, bacon crocante", img: "https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=200&q=75", disponivel: true },
+        { id: 3, nome: "Crispy Chicken", preco: 32.9, categoria: "burger", descricao: "Frango empanado crocante, maionese de mel, picles", img: "https://images.unsplash.com/photo-1606755962773-d324e0a13086?w=200&q=75", disponivel: true },
+        { id: 4, nome: "Veggie Smash", preco: 29.9, categoria: "burger", descricao: "Blend de grão-de-bico, queijo vegano, rúcula", img: "https://images.unsplash.com/photo-1520072959219-c595dc870360?w=200&q=75", disponivel: true },
+        { id: 5, nome: "BBQ Bacon", preco: 36.9, categoria: "burger", descricao: "Blend 200g, cheddar defumado, onion rings, BBQ", img: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=200&q=75", disponivel: false },
+        { id: 6, nome: "Batata Frita P", preco: 12.9, categoria: "acomp", descricao: "Batata crocante com sal e ervas", img: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=200&q=75", disponivel: true },
+        { id: 7, nome: "Batata Frita G", preco: 18.9, categoria: "acomp", descricao: "Porção grande para compartilhar", img: "https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?w=200&q=75", disponivel: true },
+        { id: 8, nome: "Onion Rings", preco: 16.9, categoria: "acomp", descricao: "Anéis de cebola empanados crocantes", img: "https://images.unsplash.com/photo-1639024471283-03518883512d?w=200&q=75", disponivel: true },
+        { id: 9, nome: "Refrigerante", preco: 7.9, categoria: "bebida", descricao: "Coca-Cola, Guaraná ou Sprite — lata 350ml", img: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=200&q=75", disponivel: true },
+        { id: 10, nome: "Milk Shake", preco: 19.9, categoria: "bebida", descricao: "Chocolate, Baunilha ou Morango — 400ml", img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=200&q=75", disponivel: true },
+        { id: 11, nome: "Água Mineral", preco: 5.9, categoria: "bebida", descricao: "500ml com ou sem gás", img: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=200&q=75", disponivel: true },
+        { id: 12, nome: "Brownie", preco: 11.9, categoria: "sobremesa", descricao: "Brownie quente com sorvete de creme", img: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=200&q=75", disponivel: true },
       ];
 
       // Garante que o banco tem a lista base
@@ -1543,6 +1590,78 @@
          closeDetailModal(null, true);
       }
 
+      // ── MÉTODOS DE PRODUTOS ──
+      function openProductModal() {
+        document.getElementById('p-nome').value = '';
+        document.getElementById('p-preco').value = '';
+        document.getElementById('p-desc').value = '';
+        document.getElementById('p-img').value = '';
+        document.getElementById('p-cat').value = 'burger';
+        
+        const modal = document.getElementById('product-modal');
+        modal.style.display = 'flex';
+        setTimeout(() => modal.classList.add('show'), 10);
+      }
+
+      function closeProductModal() {
+        const modal = document.getElementById('product-modal');
+        modal.classList.remove('show');
+        setTimeout(() => modal.style.display = 'none', 200);
+      }
+
+      function saveProduct() {
+        const nome = document.getElementById('p-nome').value.trim();
+        const preco = parseFloat(document.getElementById('p-preco').value);
+        const cat = document.getElementById('p-cat').value;
+        const desc = document.getElementById('p-desc').value.trim();
+        const img = document.getElementById('p-img').value.trim();
+
+        if(!nome || isNaN(preco)) {
+            showToast("Preencha o nome e o preço do produto", "err");
+            return;
+        }
+
+        const db = readDb();
+        db.products = db.products || [];
+        db.products.unshift({ // Coloca o mais novo em primeiro
+            id: Date.now(), 
+            nome: nome,
+            preco: preco,
+            categoria: cat,
+            descricao: desc,
+            img: img || "https://images.unsplash.com/photo-1550547660-d9450f859349?w=200&q=75", // Hamburguer genérico de placeholder
+            disponivel: true
+        });
+        
+        writeDb(db);
+        closeProductModal();
+        renderCardapio();
+        showToast("🍔 Produto adicionado ao cardápio!", "ok");
+      }
+
+      function deleteProduct(id) {
+        openModal(
+          "Excluir Produto", 
+          "Este produto será removido <b>permanentemente</b> de todos os cardápios em tempo real. Tem certeza?", 
+          "🗑️ Excluir", 
+          "red", 
+          () => {
+            const db = readDb();
+            db.products = db.products.filter(p => p.id !== id);
+            writeDb(db);
+            renderCardapio();
+            showToast("Produto excluído com sucesso.", "ok");
+          }
+        );
+      }
+
+      function toggleProduct(id) {
+        const db = readDb();
+        const p = db.products.find((prod) => prod.id === id);
+        if (!p) return;
+        p.disponivel = !p.disponivel; writeDb(db); renderCardapio(); showToast(`${p.nome}: ${p.disponivel ? "✅ Ativado" : "❌ Pausado"}`);
+      }
+
       // ── Update order status ───────────────────────────────────────
       function setOrderStatus(sessionId, orderId, status) {
         const db = readDb();
@@ -1571,13 +1690,23 @@
       }
 
       function zerarCaixa() {
-        openModal("Zerar Caixa do Dia", "Esta ação vai limpar o painel. Mesas e deliveries sumirão da tela inicial, mas o faturamento continuará <b>salvo no Relatório</b>.", "🧹 Zerar Painel", "red", () => {
+        const db = readDb();
+        const mesasAbertas = (db.sessions || []).some(sess => sess.status === "open" && !sess.archived);
+        const deliveryPendente = (db.deliveries || []).some(del => del.status !== "delivered" && !del.archived);
+
+        if (mesasAbertas || deliveryPendente) {
+          showToast("⚠️ Feche as mesas e conclua deliveries para zerar.", "err");
+          return;
+        }
+
+        openModal("Zerar Caixa do Dia", "Mesas e deliveries sumirão da tela inicial, mas o faturamento continuará <b>salvo no Relatório</b>.", "🧹 Zerar Painel", "red", () => {
             const dbAtualizado = readDb();
             (dbAtualizado.sessions || []).forEach((sess) => {
-              if (sess.status === "open") { sess.status = "closed"; sess.closedAt = Date.now(); }
-              sess.archived = true;
+              if (sess.status === "closed") sess.archived = true;
             });
-            (dbAtualizado.deliveries || []).forEach((del) => { del.archived = true; });
+            (dbAtualizado.deliveries || []).forEach((del) => {
+              if (del.status === "delivered") del.archived = true;
+            });
             writeDb(dbAtualizado); refresh(); showToast("Caixa zerado! Dados arquivados com sucesso.", "ok");
         });
       }
@@ -1596,13 +1725,6 @@
             const novaSessao = { sessionId: `sess_${numeroMesa}_${Date.now()}`, mesa: numeroMesa, token: tokenMap[numeroMesa], status: "open", orders: [], archived: false, garcomChamado: false, createdAt: Date.now(), updatedAt: Date.now() };
             db.sessions.push(novaSessao); writeDb(db); refresh(); showToast(`Mesa ${numeroMesa} reativada com sucesso!`);
         });
-      }
-
-      function toggleProduct(id) {
-        const db = readDb();
-        const p = db.products.find((prod) => prod.id === id);
-        if (!p) return;
-        p.disponivel = !p.disponivel; writeDb(db); renderCardapio(); showToast(`${p.nome}: ${p.disponivel ? "✅ Ativado" : "❌ Desativado"}`);
       }
 
       function dismissAllWaiters() {
@@ -1731,7 +1853,6 @@
             const next = NEXT_STATUS[o.status];
             const isDelivered = o.status === "delivered";
 
-            // Card agora possui onclick e a observação usa truncate
             return `<div class="order-card ${isDelivered ? 'is-delivered' : ''}" onclick="openOrderDetail('salao', '${o.orderId}', '${o.sessionId}')">
       <div class="oc-head">
         <div><div class="oc-mesa">🪑 Mesa ${o.mesa}</div><div class="oc-id">#${o.orderId.slice(-8).toUpperCase()}</div></div>
@@ -1826,17 +1947,24 @@
       function renderCardapio() {
         const db = readDb();
         const grid = document.getElementById("prod-grid");
+        
         grid.innerHTML = (db.products || []).map((p) => `
     <div class="prod-card">
-      <img class="prod-thumb" src="${p.img}" alt="${p.nome}" onerror="this.style.display='none'"/>
+      <img class="prod-thumb" src="${p.img}" alt="${p.nome}" onerror="this.style.background='var(--s2)';this.src=''"/>
       <div class="prod-info">
         <div>
           <div class="prod-name">${p.nome}</div>
           <div class="prod-price">${fmt(p.preco)}</div>
         </div>
-        <button class="toggle-btn ${p.disponivel ? "toggle-on" : "toggle-off"}" onclick="toggleProduct(${p.id})">
-          ${p.disponivel ? "✅ Disponível" : "❌ Indisponível"}
-        </button>
+        
+        <div style="display:flex; gap:6px; margin-top:8px;">
+           <button class="toggle-btn ${p.disponivel ? "toggle-on" : "toggle-off"}" onclick="toggleProduct(${p.id})" style="flex:1;">
+             ${p.disponivel ? "✅ Ativo" : "❌ Pausado"}
+           </button>
+           <button class="toggle-btn toggle-off" onclick="deleteProduct(${p.id})" style="color:var(--red); border-color:var(--red); background:transparent;">
+             🗑️
+           </button>
+        </div>
       </div>
     </div>`).join("");
       }
@@ -1851,7 +1979,7 @@
         const grid = document.getElementById("delivery-grid");
         const db = readDb();
 
-        let deliveries = (db.deliveries || []).filter((d) => !d.archived).sort((a, b) => a.createdAt - b.createdAt); 
+        let deliveries = (db.deliveries || []).filter((d) => !d.archived).sort((a, b) => b.createdAt - a.createdAt); 
 
         if (S.deliveryStatusFilter !== "all") { deliveries = deliveries.filter((d) => d.status === S.deliveryStatusFilter); } 
         else { deliveries = deliveries.filter((d) => d.status !== "delivered"); }
@@ -1872,7 +2000,6 @@
             const e = d.endereco || {};
             const addrLine = [e.rua, e.numero, e.complemento, e.bairro].filter(Boolean).join(", ");
             
-            // Adicionado onclick="openOrderDetail"
             return `<div class="order-card ${isDelivered ? "is-delivered" : ""}" style="border-left:3px solid ${isDelivered ? "transparent" : "var(--blue)"}" onclick="openOrderDetail('delivery', '${d.deliveryId}', null)">
       <div class="oc-head">
         <div>

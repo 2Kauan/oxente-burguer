@@ -219,7 +219,7 @@
       }
 
       /* ── Form ── */
-      .field { margin-bottom: 14px; }
+      .field { margin-bottom: 14px; text-align: left;}
       .field-label { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; display: block; }
       .field-row { display: grid; gap: 10px; }
       .field-row.col2 { grid-template-columns: 1fr 1fr; }
@@ -241,7 +241,7 @@
       .pay-opt { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: white; border: 1.5px solid var(--border); border-radius: var(--r-sm); cursor: pointer; transition: all 0.2s; }
       .pay-opt.selected { border-color: var(--acc); background: rgba(232, 82, 26, 0.04); }
       .pay-opt-icon { font-size: 22px; width: 32px; text-align: center; }
-      .pay-opt-body { flex: 1; }
+      .pay-opt-body { flex: 1; text-align: left; }
       .pay-opt-title { font-weight: 700; font-size: 14px; margin-bottom: 1px; }
       .pay-opt-sub { font-size: 12px; color: var(--muted); }
       .pay-radio { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
@@ -258,25 +258,25 @@
       /* ── Search + Category ── */
       .search-wrap { padding: 14px 18px 4px; }
       .search-inp { width: 100%; background: white; border: 1.5px solid var(--border); border-radius: var(--r-sm); padding: 10px 14px 10px 38px; color: var(--text); font-family: "Outfit", sans-serif; font-size: 14px; outline: none; transition: border-color 0.2s; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%238a7f72' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398l3.85 3.85a1 1 0 0 0 1.415-1.415l-3.868-3.833zm-5.242 1.656a5 5 0 1 1 0-10 5 5 0 0 1 0 10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: 12px 50%; }
-      .cat-scroll { display: flex; gap: 7px; padding: 10px 18px; overflow-x: auto; scrollbar-width: none; }
+      .cat-scroll { display: flex; gap: 7px; padding: 10px 18px; overflow-x: auto; scrollbar-width: none; position: sticky; top: 104px; z-index: 85; background: var(--bg); border-bottom: 1px solid var(--border); }
       .cat-scroll::-webkit-scrollbar { display: none; }
       .cat-btn { flex-shrink: 0; padding: 6px 14px; border-radius: 99px; border: 1.5px solid var(--border); background: white; color: var(--muted); font-family: "Outfit", sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
       .cat-btn.active { background: var(--acc); border-color: var(--acc); color: white; }
 
       /* ── Product cards ── */
-      .products-list { padding: 4px 18px; display: flex; flex-direction: column; gap: 10px; }
-      .prod-card { background: white; border: 1.5px solid var(--border); border-radius: var(--r); overflow: hidden; display: flex; transition: border-color 0.2s; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04); }
-      .prod-card.unavail { opacity: 0.45; pointer-events: none; }
+      .products-list { padding: 14px 18px; display: flex; flex-direction: column; gap: 10px; }
+      .prod-card { background: white; border: 1.5px solid var(--border); border-radius: var(--r); overflow: hidden; display: flex; transition: border-color 0.2s, background 0.2s; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04); cursor: pointer; }
+      .prod-card:active { background: var(--s2); }
+      .prod-card.unavail { opacity: 0.45; pointer-events: none; filter: grayscale(50%); }
       .prod-img { width: 88px; height: 88px; object-fit: cover; flex-shrink: 0; background: var(--s2); }
-      .prod-body { flex: 1; padding: 12px 14px 12px 12px; display: flex; flex-direction: column; justify-content: space-between; min-width: 0; }
+      .prod-body { flex: 1; padding: 12px 14px 12px 12px; display: flex; flex-direction: column; justify-content: space-between; min-width: 0; text-align: left; }
       .prod-name { font-weight: 700; font-size: 14px; margin-bottom: 2px; line-height: 1.3; }
       .prod-desc { font-size: 11px; color: var(--muted); line-height: 1.4; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
       .unavail-tag { font-size: 10px; color: var(--red); font-weight: 700; margin-top: 2px; }
       .prod-bottom { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
       .prod-price { font-family: "Playfair Display", serif; font-size: 16px; font-weight: 700; color: var(--acc); }
       .add-btn { width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid var(--acc); background: transparent; color: var(--acc); font-size: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; line-height: 1; }
-      .add-btn.in-cart { background: var(--acc); color: white; }
-      .add-btn:active { transform: scale(0.88); }
+      .add-btn:active { transform: scale(0.88); background: rgba(232, 82, 26, 0.1); }
 
       /* ── Cart review ── */
       .cart-empty { display: flex; flex-direction: column; align-items: center; padding: 50px 24px; gap: 10px; color: var(--muted); text-align: center; }
@@ -285,11 +285,10 @@
       .cart-items { padding: 14px 18px; display: flex; flex-direction: column; gap: 10px; }
       .cart-item { background: white; border: 1.5px solid var(--border); border-radius: var(--r); padding: 12px 14px; display: flex; gap: 10px; align-items: flex-start; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04); }
       .ci-img { width: 46px; height: 46px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background: var(--s2); }
-      .ci-body { flex: 1; min-width: 0; }
+      .ci-body { flex: 1; min-width: 0; text-align: left; }
       .ci-name { font-weight: 700; font-size: 13px; margin-bottom: 2px; }
       .ci-price { font-size: 12px; color: var(--muted); }
-      .obs-inp { width: 100%; margin-top: 6px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; color: var(--text); font-family: "Outfit", sans-serif; font-size: 12px; outline: none; resize: none; transition: border-color 0.2s; }
-      .obs-inp:focus { border-color: var(--acc); }
+      .cart-item-obs-txt { font-size: 10px; color: var(--acc2); margin-top: 2px; line-height: 1.3; white-space: pre-line; }
       .ci-controls { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
       .qty-btn { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border); background: var(--s2); color: var(--text); font-size: 15px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; }
       .qty-btn.del { border-color: var(--red); color: var(--red); }
@@ -322,10 +321,10 @@
       .track-step.done .track-dot { border-color: var(--acc); background: var(--acc); color: white; }
       .track-step.active .track-dot { border-color: var(--acc); background: white; animation: trackPulse 1.5s infinite; }
       @keyframes trackPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(232, 82, 26, 0.4); } 50% { box-shadow: 0 0 0 6px rgba(232, 82, 26, 0); } }
-      .track-info { flex: 1; padding-top: 2px; }
+      .track-info { flex: 1; padding-top: 2px; text-align: left; }
       .track-title { font-weight: 700; font-size: 14px; }
       .track-sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
-      .addr-summary { margin: 0 18px 14px; background: var(--s2); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 12px 14px; font-size: 13px; color: var(--muted); display: flex; gap: 10px; align-items: flex-start; }
+      .addr-summary { margin: 0 18px 14px; background: var(--s2); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 12px 14px; font-size: 13px; color: var(--muted); display: flex; gap: 10px; align-items: flex-start; text-align: left;}
       .addr-icon { font-size: 18px; flex-shrink: 0; }
 
       /* ── Sticky Footers ── */
@@ -355,6 +354,54 @@
       .skel { background: linear-gradient(90deg, white 25%, var(--s2) 50%, white 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: var(--r); }
       @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
       .skel-card { height: 88px; margin: 0 18px 10px; }
+
+      /* ── MODAL CENTRAL (PRODUTO + EXTRAS) ── */
+      .prod-modal-overlay {
+        display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+        z-index: 9999; align-items: center; justify-content: center;
+        opacity: 0; transition: opacity 0.2s ease; padding: 20px;
+      }
+      .prod-modal-overlay.show { display: flex; opacity: 1; }
+      
+      .prod-modal-box {
+        background: var(--bg); width: 100%; max-width: 380px; border-radius: 20px;
+        overflow: hidden; transform: translateY(20px) scale(0.95);
+        transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        display: flex; flex-direction: column; max-height: 85vh; border: 1px solid var(--border);
+        position: relative; text-align: left;
+      }
+      .prod-modal-overlay.show .prod-modal-box { transform: translateY(0) scale(1); }
+      
+      .pm-close {
+        position: absolute; top: 12px; right: 12px; width: 32px; height: 32px;
+        background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%;
+        font-size: 16px; display: flex; align-items: center; justify-content: center;
+        cursor: pointer; backdrop-filter: blur(4px); z-index: 10;
+      }
+      
+      .pm-img { width: 100%; height: 180px; object-fit: cover; background: var(--s2); flex-shrink: 0; }
+      .pm-body { padding: 20px; overflow-y: auto; flex: 1; }
+      
+      .pm-title { font-family: "Playfair Display", serif; font-size: 22px; font-weight: 900; margin-bottom: 6px; color: var(--acc); line-height: 1.1; }
+      .pm-desc { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 20px; }
+      
+      .pm-section-title { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; display: block; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+      
+      .pm-extra-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+      .pm-extra-info { display: flex; flex-direction: column; }
+      .pm-extra-name { font-size: 14px; font-weight: 600; color: var(--text); }
+      .pm-extra-price { font-size: 12px; color: var(--acc2); font-weight: 600; }
+      
+      .pm-obs-input { width: 100%; background: white; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text); font-family: "Outfit", sans-serif; font-size: 13px; outline: none; resize: vertical; min-height: 60px; margin-bottom: 10px;}
+      .pm-obs-input:focus { border-color: var(--acc); }
+      .pm-obs-input::placeholder { color: var(--dim); }
+
+      .pm-footer { padding: 16px 20px; background: white; border-top: 1px solid var(--border); display: flex; gap: 12px; align-items: center; }
+      .pm-qty-ctrl { display: flex; align-items: center; gap: 12px; background: var(--s2); border: 1px solid var(--border); border-radius: 10px; padding: 4px; }
+      .pm-qty-ctrl button { width: 34px; height: 34px; background: transparent; border: none; color: var(--text); font-size: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+      .pm-qty-ctrl button:active { background: white; border-radius: 6px; }
+      .pm-qty-ctrl span { font-weight: 700; font-size: 16px; min-width: 20px; text-align: center; }
     </style>
   </head>
   <body>
@@ -402,21 +449,11 @@
         />
       </div>
       <div class="cat-scroll">
-        <button class="cat-btn active" onclick="setCat(this, 'all')">
-          Todos
-        </button>
-        <button class="cat-btn" onclick="setCat(this, 'burger')">
-          🍔 Burgers
-        </button>
-        <button class="cat-btn" onclick="setCat(this, 'acomp')">
-          🍟 Acompanhamentos
-        </button>
-        <button class="cat-btn" onclick="setCat(this, 'bebida')">
-          🥤 Bebidas
-        </button>
-        <button class="cat-btn" onclick="setCat(this, 'sobremesa')">
-          🍫 Sobremesas
-        </button>
+        <button class="cat-btn active" onclick="setCat(this, 'all')">Todos</button>
+        <button class="cat-btn" onclick="setCat(this, 'burger')">🍔 Burgers</button>
+        <button class="cat-btn" onclick="setCat(this, 'acomp')">🍟 Acompanhamentos</button>
+        <button class="cat-btn" onclick="setCat(this, 'bebida')">🥤 Bebidas</button>
+        <button class="cat-btn" onclick="setCat(this, 'sobremesa')">🍫 Sobremesas</button>
       </div>
       <div class="products-list" id="products-list">
         <div class="skel skel-card"></div>
@@ -443,38 +480,19 @@
 
         <div class="field">
           <label class="field-label">Nome completo *</label>
-          <input
-            class="inp"
-            id="f-nome"
-            placeholder="João da Silva"
-            autocomplete="name"
-          />
+          <input class="inp" id="f-nome" placeholder="João da Silva" autocomplete="name" />
           <div class="inp-err" id="err-nome">Por favor, informe seu nome</div>
         </div>
 
         <div class="field">
           <label class="field-label">Telefone / WhatsApp *</label>
-          <input
-            class="inp"
-            id="f-tel"
-            placeholder="(11) 99999-9999"
-            type="tel"
-            inputmode="tel"
-            autocomplete="tel"
-            oninput="maskPhone(this)"
-          />
+          <input class="inp" id="f-tel" placeholder="(11) 99999-9999" type="tel" inputmode="tel" autocomplete="tel" oninput="maskPhone(this)" />
           <div class="inp-err" id="err-tel">Informe um telefone válido</div>
         </div>
 
         <div class="field">
           <label class="field-label">E-mail (opcional)</label>
-          <input
-            class="inp"
-            id="f-email"
-            placeholder="joao@email.com"
-            type="email"
-            autocomplete="email"
-          />
+          <input class="inp" id="f-email" placeholder="joao@email.com" type="email" autocomplete="email" />
         </div>
       </div>
 
@@ -485,21 +503,10 @@
         <div class="field">
           <label class="field-label">CEP *</label>
           <div class="cep-row">
-            <input
-              class="inp"
-              id="f-cep"
-              placeholder="00000-000"
-              inputmode="numeric"
-              maxlength="9"
-              oninput="maskCep(this)"
-            />
-            <button class="cep-btn" id="cep-btn" onclick="buscaCep()">
-              Buscar
-            </button>
+            <input class="inp" id="f-cep" placeholder="00000-000" inputmode="numeric" maxlength="9" oninput="maskCep(this)" />
+            <button class="cep-btn" id="cep-btn" onclick="buscaCep()">Buscar</button>
           </div>
-          <div class="inp-hint" id="cep-hint">
-            Digite o CEP e clique em Buscar
-          </div>
+          <div class="inp-hint" id="cep-hint">Digite o CEP e clique em Buscar</div>
           <div class="inp-err" id="err-cep">CEP inválido ou não encontrado</div>
         </div>
 
@@ -513,12 +520,7 @@
           <label class="field-label">Número * / Complemento</label>
           <div class="field-row col2">
             <div>
-              <input
-                class="inp"
-                id="f-num"
-                placeholder="123"
-                inputmode="numeric"
-              />
+              <input class="inp" id="f-num" placeholder="123" inputmode="numeric" />
               <div class="inp-err" id="err-num">Informe o número</div>
             </div>
             <input class="inp" id="f-comp" placeholder="Apt 4B" />
@@ -533,22 +535,12 @@
 
         <div class="field">
           <label class="field-label">Cidade</label>
-          <input
-            class="inp"
-            id="f-cidade"
-            placeholder="São Paulo"
-            readonly
-            style="background: var(--s2)"
-          />
+          <input class="inp" id="f-cidade" placeholder="São Paulo" readonly style="background: var(--s2)" />
         </div>
 
         <div class="field">
           <label class="field-label">Referência (opcional)</label>
-          <input
-            class="inp"
-            id="f-ref"
-            placeholder="Ex: Portão azul, próximo ao mercado"
-          />
+          <input class="inp" id="f-ref" placeholder="Ex: Portão azul, próximo ao mercado" />
         </div>
       </div>
 
@@ -560,9 +552,7 @@
 
       <div class="cta-stack">
         <button class="cta-btn" onclick="goToPayment()">CONTINUAR →</button>
-        <button class="cta-btn secondary" onclick="goScreen(0)">
-          ← Voltar ao Cardápio
-        </button>
+        <button class="cta-btn secondary" onclick="goScreen(0)">← Voltar ao Cardápio</button>
       </div>
     </div>
 
@@ -575,9 +565,7 @@
       <div id="cart-review"></div>
 
       <div class="section" style="padding-top: 0">
-        <div class="section-title" style="font-size: 18px; margin-bottom: 14px">
-          Forma de pagamento
-        </div>
+        <div class="section-title" style="font-size: 18px; margin-bottom: 14px">Forma de pagamento</div>
 
         <div class="pay-options">
           <div class="pay-opt selected" onclick="selectPay('dinheiro', this)">
@@ -593,9 +581,7 @@
             <div class="pay-opt-icon">💳</div>
             <div class="pay-opt-body">
               <div class="pay-opt-title">Cartão na entrega</div>
-              <div class="pay-opt-sub">
-                Débito ou crédito — maquininha na entrega
-              </div>
+              <div class="pay-opt-sub">Débito ou crédito — maquininha na entrega</div>
             </div>
             <div class="pay-radio"></div>
           </div>
@@ -611,15 +597,8 @@
         </div>
 
         <div class="troco-wrap" id="troco-wrap">
-          <label class="field-label" style="margin-top: 12px"
-            >Troco para quanto?</label
-          >
-          <input
-            class="inp"
-            id="f-troco"
-            placeholder="Ex: 100,00 — deixe vazio se não precisar"
-            inputmode="decimal"
-          />
+          <label class="field-label" style="margin-top: 12px">Troco para quanto?</label>
+          <input class="inp" id="f-troco" placeholder="Ex: 100,00 — deixe vazio se não precisar" inputmode="decimal" />
         </div>
 
         <div class="pix-box" id="pix-box">
@@ -645,21 +624,14 @@
           ← Voltar ao Endereço
         </button>
       </div>
-
     </div>
 
     <div class="screen" id="screen-confirm">
       <div class="confirm-hero">
         <div class="confirm-anim" id="confirm-icon">🛵</div>
         <div class="confirm-title">Pedido Confirmado!</div>
-        <p class="confirm-sub">
-          Seu pedido foi recebido e está sendo preparado.<br />Acompanhe o
-          status abaixo.
-        </p>
-        <div class="confirm-id">
-          Pedido<br />
-          <b id="confirm-id-val">–</b>
-        </div>
+        <p class="confirm-sub">Seu pedido foi recebido e está sendo preparado.<br />Acompanhe o status abaixo.</p>
+        <div class="confirm-id">Pedido<br /><b id="confirm-id-val">–</b></div>
       </div>
 
       <div class="addr-summary" id="addr-summary-box">
@@ -670,30 +642,27 @@
       <div class="tracking-box">
         <div class="tracking-head">
           <span>📦 Acompanhamento</span>
-          <span
-            style="font-size: 11px; font-weight: 400; opacity: 0.7"
-            id="track-eta"
-            >~45 min</span
-          >
+          <span style="font-size: 11px; font-weight: 400; opacity: 0.7" id="track-eta">~45 min</span>
         </div>
         <div class="tracking-steps" id="tracking-steps"></div>
       </div>
 
       <div class="cta-stack">
-        <button class="cta-btn secondary" onclick="novoDelivery()">
-          Fazer novo pedido
-        </button>
+        <button class="cta-btn secondary" onclick="novoDelivery()">Fazer novo pedido</button>
       </div>
+    </div>
+
+    <div class="prod-modal-overlay" id="prod-modal" onclick="closeProdModal(event)">
+      <div class="prod-modal-box" id="prod-modal-box"></div>
     </div>
 
     <div class="toast" id="toast"></div>
 
     <script>
       /* ═══════════════════════════════════════════════════════════════
-       DELIVERY APP - VERSÃO 100% BLINDADA E DIRETA COM BOTÕES iFOOD
+       DELIVERY APP - COM MODAL DE EXTRAS E RADAR INTELIGENTE (UX)
       ═══════════════════════════════════════════════════════════════ */
 
-      // ── DB (mesma chave do admin) ─────────────────────
       const DB_KEY = "burgerhouse_db_v2";
       const DB_VER = 2;
 
@@ -720,25 +689,19 @@
       const DEFAULT_PRODUCTS = [
         { id: 1, nome: "Smash Clássico", preco: 28.9, categoria: "burger", descricao: "Blend 180g, queijo cheddar, alface, tomate", img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80", disponivel: true },
         { id: 2, nome: "Double Smash", preco: 38.9, categoria: "burger", descricao: "Dois blends 180g, duplo cheddar, bacon crocante", img: "https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=400&q=80", disponivel: true },
-        { id: 3, nome: "Crispy Chicken", preco: 32.9, categoria: "burger", descricao: "Frango empanado crocante, maionese de mel, picles", img: "https://images.unsplash.com/photo-1606755962773-d324e0a13086?w=400&q=80", disponivel: true },
-        { id: 4, nome: "Veggie Smash", preco: 29.9, categoria: "burger", descricao: "Blend de grão-de-bico, queijo vegano, rúcula", img: "https://images.unsplash.com/photo-1520072959219-c595dc870360?w=400&q=80", disponivel: true },
-        { id: 5, nome: "BBQ Bacon", preco: 36.9, categoria: "burger", descricao: "Blend 200g, cheddar defumado, onion rings, BBQ", img: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=400&q=80", disponivel: false },
-        { id: 6, nome: "Batata Frita P", preco: 12.9, categoria: "acomp", descricao: "Batata crocante com sal e ervas", img: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&q=80", disponivel: true },
-        { id: 7, nome: "Batata Frita G", preco: 18.9, categoria: "acomp", descricao: "Porção grande para compartilhar", img: "https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?w=400&q=80", disponivel: true },
-        { id: 8, nome: "Onion Rings", preco: 16.9, categoria: "acomp", descricao: "Anéis de cebola empanados crocantes", img: "https://images.unsplash.com/photo-1639024471283-03518883512d?w=400&q=80", disponivel: true },
-        { id: 9, nome: "Refrigerante", preco: 7.9, categoria: "bebida", descricao: "Coca-Cola, Guaraná ou Sprite — lata 350ml", img: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&q=80", disponivel: true },
-        { id: 10, nome: "Milk Shake", preco: 19.9, categoria: "bebida", descricao: "Chocolate, Baunilha ou Morango — 400ml", img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=400&q=80", disponivel: true },
-        { id: 11, nome: "Água Mineral", preco: 5.9, categoria: "bebida", descricao: "500ml com ou sem gás", img: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400&q=80", disponivel: true },
-        { id: 12, nome: "Brownie", preco: 11.9, categoria: "sobremesa", descricao: "Brownie quente com sorvete de creme", img: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=400&q=80", disponivel: true },
+      ];
+
+      // Catálogo de Adicionais genéricos
+      const EXTRAS_CATALOG = [
+        { id: "ext_carne", nome: "+ Carne (180g)", preco: 8.0 },
+        { id: "ext_bacon", nome: "+ Bacon Crocante", preco: 4.0 },
+        { id: "ext_cheddar", nome: "+ Cheddar Cremoso", preco: 3.5 },
+        { id: "ext_cebola", nome: "+ Cebola Caramelizada", preco: 2.5 }
       ];
 
       function getProducts() {
         const db = readDb();
-        const dbProds = db.products || [];
-        return DEFAULT_PRODUCTS.map((p) => {
-          const dbP = dbProds.find((d) => d.id === p.id);
-          return dbP ? { ...p, disponivel: dbP.disponivel } : p;
-        });
+        return db.products || [];
       }
 
       const TAXA_ENTREGA = 7.0;
@@ -752,6 +715,7 @@
       ];
 
       let S = { screen: 0, cat: "all", cart: [], pagamento: "dinheiro", deliveryId: null };
+      let M = { prodId: null, qty: 1, extras: {} }; // Estado do Modal
 
       function fmt(v) { return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v); }
       function cartTotal() { return S.cart.reduce((s, i) => s + i.preco * i.quantidade, 0); }
@@ -811,34 +775,17 @@
             list.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted);font-size:14px">Nenhum item encontrado</div>`;
           } else {
             list.innerHTML = items.map((p) => {
-              const inCart = S.cart.find((c) => c.id === p.id);
-              
-              let btnHtml = "";
-              if (p.disponivel) {
-                if (inCart) {
-                  // Controles interativos estilo iFood
-                  btnHtml = `<div style="display:flex; align-items:center; gap:6px;">
-                    <button class="qty-btn del" onclick="updateQty(${p.id}, -1)">−</button>
-                    <span class="qty-num" style="font-size:14px; min-width:20px;">${inCart.quantidade}</span>
-                    <button class="qty-btn" onclick="updateQty(${p.id}, +1)" style="color: var(--acc); border-color: var(--acc);">+</button>
-                  </div>`;
-                } else {
-                  // Botão Adicionar
-                  btnHtml = `<button class="add-btn" onclick="addCart(${p.id})">+</button>`;
-                }
-              }
-
-              return `<div class="prod-card${p.disponivel ? "" : " unavail"}">
+              return `<div class="prod-card${p.disponivel ? "" : " unavail"}" onclick="openProdModal(${p.id})">
                 <img class="prod-img" src="${p.img}" alt="${p.nome}" loading="lazy" onerror="this.style.background='var(--s2)';this.src=''"/>
                 <div class="prod-body">
                   <div>
                     <div class="prod-name">${p.nome}</div>
                     <div class="prod-desc">${p.descricao || ""}</div>
-                    ${!p.disponivel ? '<div class="unavail-tag">Indisponível</div>' : ""}
+                    ${!p.disponivel ? '<div class="unavail-tag">Indisponível no momento</div>' : ""}
                   </div>
                   <div class="prod-bottom">
                     <div class="prod-price">${fmt(p.preco)}</div>
-                    ${btnHtml}
+                    <button class="add-btn" onclick="event.stopPropagation(); openProdModal(${p.id})">+</button>
                   </div>
                 </div>
               </div>`;
@@ -851,28 +798,151 @@
         }
       }
 
-      function addCart(id) {
-        if (readDb().lojaAberta === false) return showToast("A loja fechou! Pedidos bloqueados.", "err");
+      // ── FUNÇÕES DO MODAL DE PRODUTO & EXTRAS ──
+      function openProdModal(id) {
+        if (readDb().lojaAberta === false) return showToast("A loja está fechada.", "err");
+        
         const prods = getProducts();
-        const p = prods.find((x) => x.id === id);
+        const p = prods.find(x => x.id === id);
         if (!p || !p.disponivel) return;
-        const ex = S.cart.find((c) => c.id === id);
-        if (ex) ex.quantidade++; else S.cart.push({ ...p, quantidade: 1, observacao: "" });
-        updateCartCta(); renderMenu(); showToast(`${p.nome} adicionado`, "ok");
+
+        M = { prodId: id, qty: 1, extras: {} };
+
+        let extrasHtml = "";
+        if (p.categoria === "burger") {
+           extrasHtml = `<div class="pm-section-title">Adicionais</div>` + EXTRAS_CATALOG.map(ext => `
+             <div class="pm-extra-row">
+               <div class="pm-extra-info">
+                 <span class="pm-extra-name">${ext.nome}</span>
+                 <span class="pm-extra-price">+ ${fmt(ext.preco)}</span>
+               </div>
+               <div class="pm-qty-ctrl" style="padding: 2px; border:none; background:transparent;">
+                 <button style="border: 1px solid var(--border); border-radius:50%; width:28px; height:28px; font-size:14px;" onclick="changeModalExtra('${ext.id}', -1)">−</button>
+                 <span id="ext-qty-${ext.id}" style="font-size:14px; min-width:24px;">0</span>
+                 <button style="border: 1px solid var(--border); border-radius:50%; width:28px; height:28px; font-size:14px; color:var(--acc); border-color:var(--acc);" onclick="changeModalExtra('${ext.id}', 1)">+</button>
+               </div>
+             </div>
+           `).join("");
+        }
+
+        const box = document.getElementById("prod-modal-box");
+        box.innerHTML = `
+          <button class="pm-close" onclick="closeProdModal(event, true)">✕</button>
+          <img class="pm-img" src="${p.img}" alt="${p.nome}" onerror="this.style.display='none'" />
+          
+          <div class="pm-body">
+            <div class="pm-title">${p.nome}</div>
+            <div class="pm-desc">${p.descricao || ""}</div>
+            
+            ${extrasHtml}
+            
+            <div class="pm-section-title" style="margin-top:20px;">Observação</div>
+            <textarea class="pm-obs-input" id="pm-obs" placeholder="Ex: Tirar cebola, maionese à parte..."></textarea>
+          </div>
+          
+          <div class="pm-footer">
+             <div class="pm-qty-ctrl">
+               <button onclick="changeModalQty(-1)">−</button>
+               <span id="pm-qty-val">1</span>
+               <button onclick="changeModalQty(1)" style="color:var(--acc);">+</button>
+             </div>
+             <button class="cta-btn" style="padding: 14px; font-size:16px; flex:1; display:flex; justify-content:space-between;" onclick="addCartFromModal()">
+               <span>Adicionar</span>
+               <span id="pm-total-btn">${fmt(p.preco)}</span>
+             </button>
+          </div>
+        `;
+        
+        const overlay = document.getElementById("prod-modal");
+        overlay.style.display = "flex";
+        setTimeout(() => overlay.classList.add("show"), 10);
       }
 
-      function updateQty(id, delta) {
+      function closeProdModal(e, force = false) {
+        if (force || e.target.id === "prod-modal") {
+          const overlay = document.getElementById("prod-modal");
+          overlay.classList.remove("show");
+          setTimeout(() => { overlay.style.display = "none"; }, 300);
+        }
+      }
+
+      function changeModalExtra(extId, delta) {
+        let atual = M.extras[extId] || 0;
+        let novo = atual + delta;
+        if (novo < 0) novo = 0;
+        if (novo > 5) novo = 5;
+        
+        M.extras[extId] = novo;
+        document.getElementById(`ext-qty-${extId}`).textContent = novo;
+        updateModalTotal();
+      }
+
+      function changeModalQty(delta) {
+        let nova = M.qty + delta;
+        if (nova < 1) nova = 1;
+        M.qty = nova;
+        document.getElementById("pm-qty-val").textContent = nova;
+        updateModalTotal();
+      }
+
+      function updateModalTotal() {
+        const p = getProducts().find(x => x.id === M.prodId);
+        if(!p) return;
+
+        let extrasTotal = 0;
+        EXTRAS_CATALOG.forEach(ext => {
+           const q = M.extras[ext.id] || 0;
+           extrasTotal += (q * ext.preco);
+        });
+
+        const finalPrice = (p.preco + extrasTotal) * M.qty;
+        document.getElementById("pm-total-btn").textContent = fmt(finalPrice);
+      }
+
+      function addCartFromModal() {
+        const p = getProducts().find(x => x.id === M.prodId);
+        if(!p) return;
+
+        let extrasTotal = 0;
+        let extrasNomes = [];
+
+        EXTRAS_CATALOG.forEach(ext => {
+           const q = M.extras[ext.id] || 0;
+           if (q > 0) {
+              extrasTotal += (q * ext.preco);
+              extrasNomes.push(`${q}x ${ext.nome}`);
+           }
+        });
+
+        let finalPreco = p.preco + extrasTotal;
+        let baseObs = document.getElementById("pm-obs").value.trim();
+        
+        let obsUnificada = "";
+        if (extrasNomes.length > 0) { obsUnificada += `[Com: ${extrasNomes.join(", ")}]`; }
+        if (baseObs) { obsUnificada += obsUnificada ? `\nObs: ${baseObs}` : `Obs: ${baseObs}`; }
+
+        S.cart.push({
+            cartItemId: Date.now() + Math.random(),
+            id: p.id,
+            nome: p.nome,
+            preco: finalPreco, 
+            quantidade: M.qty,
+            observacao: obsUnificada,
+            img: p.img
+        });
+
+        updateCartCta(); renderMenu();
+        closeProdModal(null, true);
+        showToast(`${p.nome} adicionado`, "ok");
+      }
+
+      function updateQty(cartItemId, delta) {
         if (readDb().lojaAberta === false && delta > 0) return showToast("Loja fechada.", "err");
-        const idx = S.cart.findIndex((c) => c.id === id);
+        const idx = S.cart.findIndex((c) => c.cartItemId === cartItemId);
         if (idx === -1) return;
         S.cart[idx].quantidade += delta;
         if (S.cart[idx].quantidade <= 0) S.cart.splice(idx, 1);
-        renderCartReview(); renderMenu(); updateCartCta();
-      }
-
-      function updateObs(id, val) {
-        const item = S.cart.find((c) => c.id === id);
-        if (item) item.observacao = val;
+        renderCartReview(); updateCartCta();
       }
 
       function updateCartCta() {
@@ -920,11 +990,11 @@
                 <div class="ci-body">
                   <div class="ci-name">${item.nome}</div>
                   <div class="ci-price">${fmt(item.preco)} cada</div>
-                  <textarea class="obs-inp" rows="1" placeholder="Observação (sem cebola…)" oninput="updateObs(${item.id},this.value)">${item.observacao || ""}</textarea>
+                  ${item.observacao ? `<div class="cart-item-obs-txt">${item.observacao}</div>` : ""}
                   <div class="ci-controls">
-                    <button class="qty-btn del" onclick="updateQty(${item.id},-1)">−</button>
+                    <button class="qty-btn del" onclick="updateQty(${item.cartItemId},-1)">−</button>
                     <span class="qty-num">${item.quantidade}</span>
-                    <button class="qty-btn" onclick="updateQty(${item.id},+1)">+</button>
+                    <button class="qty-btn" onclick="updateQty(${item.cartItemId},+1)">+</button>
                     <span style="font-size:12px;color:var(--muted);margin-left:4px">${fmt(item.preco * item.quantidade)}</span>
                   </div>
                 </div>
@@ -936,7 +1006,6 @@
             <div class="summ-eta" style="margin-top:0; border-top:none; padding-top:0;"><span>🕐</span><span>Estimativa: <b>40–55 min</b></span></div>
           </div>`;
           
-        // Atualiza o valor do rodapé fixo
         document.getElementById("sticky-total-txt").textContent = fmt(total);
       }
 
@@ -1049,7 +1118,6 @@
 
       async function placeOrder() {
         try {
-          // Bloqueio Absoluto no momento final
           if (readDb().lojaAberta === false) {
              showToast("A loja fechou! Não é possível enviar o pedido.", "err");
              goScreen(0);
@@ -1162,17 +1230,14 @@
         const banner = document.getElementById("closed-banner");
         
         if (!isAberto) {
-          // FECHADO: Aplica classe no body e mostra banner
           document.body.classList.add("is-closed");
           banner.classList.add("show");
           
-          // Se o usuário estava montando pedido (Endereço ou Pagamento), chuta pro Menu
           if (S.screen === 1 || S.screen === 2) {
             showToast("A loja acabou de fechar!", "err");
             goScreen(0);
           }
         } else {
-          // ABERTO: Remove classe do body e esconde banner
           document.body.classList.remove("is-closed");
           banner.classList.remove("show");
         }
@@ -1181,7 +1246,6 @@
       function initApp() {
         S.cat = "all";
         
-        // Verifica status inicial da loja
         const initialDb = readDb();
         _wasOpen = initialDb.lojaAberta !== false;
         renderLojaFechadaState(_wasOpen);
@@ -1194,14 +1258,14 @@
         setInterval(() => {
           const db = readDb();
 
-          // 1. Radar do Status da Loja (Kill Switch)
+          // 1. Radar do Status da Loja
           const isNowOpen = db.lojaAberta !== false;
           if (isNowOpen !== _wasOpen) {
             _wasOpen = isNowOpen;
             renderLojaFechadaState(isNowOpen);
           }
 
-          // 2. Radar do Cardápio (Atualiza sem piscar a tela)
+          // 2. Radar do Cardápio
           if (S.screen === 0) {
             const novoMenu = JSON.stringify(getProducts());
             if (novoMenu !== _menuHash) {
@@ -1218,7 +1282,6 @@
         }, POLL_MS);
       }
 
-      // Inicia o app imediatamente!
       initApp();
     </script>
   </body>
